@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="none">
+        <item
+            android:id="@+id/editprofile"
+            android:icon="@drawable/ic_baseline_edit_24"
+            android:title="프로필 수정" />
+        <item
+            android:id="@+id/itemlist"
+            android:icon="@drawable/ic_baseline_playlist_add_check_24"
+            android:title="여행 물품 체크리스트" />
+        <item
+            android:id="@+id/friendlist"
+            android:icon="@drawable/ic_baseline_group_24"
+            android:title="전체 친구 목록"/>
+        <item
+            android:id="@+id/addfriend"
+            android:icon="@drawable/ic_baseline_group_add_24"
+            android:title="동료 추가" />
+        <item
+            android:id="@+id/settings"
+            android:icon="@drawable/ic_baseline_settings_24"
+            android:title="설정" />
+        <item
+            android:id="@+id/qna"
+            android:icon="@drawable/ic_baseline_question_answer_24"
+            android:title="관리자에게 문의" />
+    </group>
+
+</menu>
