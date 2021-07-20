@@ -6,96 +6,78 @@
     android:layout_height="match_parent"
     tools:context=".SearchAddress">
 
-    <TextView
-        android:id="@+id/text_postalcode"
-        android:layout_width="wrap_content"
+    <include
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:layout_marginEnd="290dp"
-        android:text="우편 번호"
-        android:textSize="20dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        layout="@layout/toolbar_search_address"/>
 
     <TextView
-        android:id="@+id/text_postnum"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="주소를 검색하시려면\n'우편번호 조회'를 눌러주세요"
+        android:textSize="19sp"
+        android:textAlignment="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="90dp"/>
+
+    <TextView
+        android:id="@+id/text_postalCDN"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:layout_marginEnd="170dp"
-        android:textSize="20dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_postalcode"
+        android:layout_marginTop="150dp"
+        android:layout_marginStart="20dp"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toStartOf="@id/btn_search_postalCD"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="@drawable/edge"/>
+        app:layout_constraintBottom_toTopOf="@id/text_queryaddress1"
+        android:background="@drawable/edge_all_textview"/>
 
     <Button
+        android:id="@+id/btn_search_postalCD"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:layout_marginTop="52dp"
+        android:layout_marginTop="150dp"
         android:layout_marginEnd="50dp"
         android:text="우편번호 조회"
-        android:textSize="15dp"
+        android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_postnum"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/text_address1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:layout_marginEnd="250dp"
-        android:layout_marginBottom="650dp"
-        android:text="주소"
-        android:textSize="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_postalcode" />
+        app:layout_constraintStart_toEndOf="@id/text_postalCDN"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/text_queryaddress1" />
 
     <TextView
         android:id="@+id/text_queryaddress1"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:layout_marginEnd="17dp"
-        android:layout_marginBottom="650dp"
-        android:textSize="20dp"
+        android:layout_width="290dp"
+        android:layout_height="30dp"
+        android:text="주소"
+        android:paddingStart="10dp"
+        android:paddingTop="5dp"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_address1"
-        app:layout_constraintTop_toBottomOf="@id/text_postnum"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:background="@drawable/edge"/>
-
-    <TextView
-        android:id="@+id/text_address2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:layout_marginBottom="560dp"
-        android:text="상세 주소"
-        android:textSize="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/text_queryaddress2"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_address1"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toBottomOf="@id/text_postalCDN"
+        app:layout_constraintBottom_toTopOf="@id/text_queryaddress2"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/edge_underline_textview"/>
 
     <EditText
         android:id="@+id/text_queryaddress2"
-        android:layout_width="250dp"
-        android:layout_height="30dp"
-        android:textSize="20dp"
-        android:background="@drawable/edge"
-        app:layout_constraintTop_toBottomOf="@id/text_queryaddress1"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="400dp"
+        android:layout_marginEnd="20dp"
+        android:text="상세주소"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:textSize="18sp"
+        android:autofillHints="상세주소"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_address2"
-        android:layout_marginEnd="17dp"
-        android:layout_marginBottom="550dp"
-        />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_queryaddress1"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

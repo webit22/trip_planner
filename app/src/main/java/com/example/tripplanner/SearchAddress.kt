@@ -1,5 +1,6 @@
 package com.example.tripplanner
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -25,8 +26,13 @@ class SearchAddress : AppCompatActivity() {
         _binding = ActivitySearchAddressBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.btnSearchPostalCD.setOnClickListener {
+            val intent = Intent(this, DaumPostalCD::class.java)
+            startActivity(intent)
+        }
+
         //searchKeyword() 파라미터 값을 EditText에 입력한 값으로 받아오는 방법?
-        searchKeyword(binding.textAddress1.toString()) // 입력한 내용 조회
+        searchKeyword("은행") // 입력한 내용 조회
         // 우편번호 조회 버튼 클릭 시 다음 주소 검색창 연결
     }
 
