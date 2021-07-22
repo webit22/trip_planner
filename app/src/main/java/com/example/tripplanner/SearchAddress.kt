@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import com.example.tripplanner.databinding.ActivitySearchAddressBinding
 import retrofit2.*
 import retrofit2.converter.gson.GsonConverterFactory
@@ -30,36 +31,21 @@ class SearchAddress : AppCompatActivity() {
             val intent = Intent(this, DaumPostalCD::class.java)
             startActivity(intent)
         }
+/*
+        if(intent.hasExtra("strAddr")){ //msg key가 옳은 값을 가지고 있는지 null check
+            val strAddress = intent.getStringExtra("strAddr")
 
-        //searchKeyword() 파라미터 값을 EditText에 입력한 값으로 받아오는 방법?
-        searchKeyword("은행") // 입력한 내용 조회
-        // 우편번호 조회 버튼 클릭 시 다음 주소 검색창 연결
-    }
-
-    // 키워드 검색 함수
-    private fun searchKeyword(keyword: String) {
-        val retrofit = Retrofit.Builder()   // Retrofit 구성
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-        val api = retrofit.create(KakaoAPI::class.java)   // 통신 인터페이스를 객체로 생성
-        val call = api.getSearchKeyword(API_KEY, keyword)   // 검색 조건 입력
-
-        // API 서버에 요청
-        call.enqueue(object : Callback<ResultSearchKeyword> {
-            override fun onResponse(
-                call: Call<ResultSearchKeyword>,
-                response: Response<ResultSearchKeyword>
-            ) {
-                // 통신 성공 (검색 결과는 response.body()에 담겨있음)
-                Log.d(TAG, "SearchAddress - searchKeyword.Raw : ${response.raw()}")
-                Log.d(TAG, "SearchAddress - searchKeyword.Body : ${response.body()}")
+            // 구분자로 string 해체
+            val addr = strAddress?.split(";")
+            if (addr != null) {
+                binding.textQueryaddress1.text = String.format("(%s) %s %s", addr[0], addr[1], addr[2]);
             }
 
-            override fun onFailure(call: Call<ResultSearchKeyword>, t: Throwable) {
-                // 통신 실패
-                Log.d(TAG, "SearchAddress - 통신 실패: ${t.message}")
-            }
-        })
+        }else{
+            Toast.makeText(this, "Not Available", Toast.LENGTH_SHORT).show()
+        }
+*/
     }
+
+
 }
