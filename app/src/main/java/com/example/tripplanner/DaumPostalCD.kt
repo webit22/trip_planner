@@ -1,21 +1,20 @@
 package com.example.tripplanner
 
 import android.annotation.SuppressLint
+import android.annotation.TargetApi
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
-import android.webkit.JavascriptInterface
-import android.webkit.WebChromeClient
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import android.widget.TextView
+import android.webkit.*
+import android.widget.Toast
 import com.example.tripplanner.databinding.ActivityDaumPostalCdBinding
-import java.lang.StringBuilder
 
 /* WebView - 다음 주소 검색 페이지 */
-class DaumPostalCD : AppCompatActivity() {
+class DaumPostalCD : AppCompatActivity(){
 
     private var _binding : ActivityDaumPostalCdBinding? = null
     private val binding get() = _binding!!
@@ -41,27 +40,50 @@ class DaumPostalCD : AppCompatActivity() {
             webViewClient = WebViewClient()
             webChromeClient = WebChromeClient()
 
-            // JavaScript 이벤트에 대응할 함수를 정의 한 클래스를 붙여줌
-            // php 파일에도 "TripPlanner" 인자 값이 동일해야함
-            addJavascriptInterface(AndroidBridge(), "TripPlanner")
+            webViewClient.onPageFinished(this, "javascript:execDaumPostcode()")
 
-            loadUrl("http://192.168.35.186/android_asset/daum.html") //local web server > 주소검색 파일
+            //javascript에서 인터페이스 호출 시 이름 "Android" 사용
+            addJavascriptInterface(AndroidBridge(), "Android")
+            loadUrl("http://localhost/android_asset/daum.html") //local web server > 주소검색 파일
         }
+
     }
 
     private fun AndroidBridge(){
+        Log.d(TAG, "DaumPostalCD - AndroidBridge() called")
+        // 주소 세팅하는 메서드
+        // 자꾸 setAddress()를 호출하지 못함
+
         @JavascriptInterface
-        fun setAddress(arg1 : String, arg2 : String, arg3 : String){
+        fun setExtraAddress(para: String){
+            binding.textJsData.text = para
+        }
+
+        @JavascriptInterface
+        fun setAddress(arg: String){
             // 파라미터 : data.zonecode, data.roadAddress, data.buildingName
             // handler를 통해 javascript 이벤트 반응
+            val extra : Bundle? = null
+            val intent : Intent? = null
+
+            extra?.putString("data", arg)
+            if(extra != null) intent?.putExtras(extra)
+
+            setResult(RESULT_OK, intent)
+            finish()
+
+            /*
             val handler = Handler()
             val result = "($arg1);$arg2;$arg3"
+            Log.d(TAG, "DaumPostalCD - setAddress.result = $result")
 
-            handler.post(Runnable {
+            handler.post({
                 intent = Intent(this, SearchAddress::class.java)
                 intent.putExtra("strAddr", result)
                 startActivity(intent)
+                finish()
             })
+            */
         }
     }
 

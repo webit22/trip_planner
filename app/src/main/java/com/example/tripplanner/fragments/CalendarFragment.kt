@@ -11,12 +11,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tripplanner.App
 import com.example.tripplanner.R
-import com.example.tripplanner.adapters.RecyclerViewAdapter
+import com.example.tripplanner.adapters.RecyclerViewAdapterFrag1
 import com.example.tripplanner.databinding.FragmentCalendarBinding
 import com.example.tripplanner.fragment1.Profiles
 
 /* calendar 화면 구현 */
-class CalendarFragment() : Fragment() {
+class CalendarFragment : Fragment() {
 
     private var _binding: FragmentCalendarBinding? = null
     private val binding get() = _binding!!
@@ -24,14 +24,14 @@ class CalendarFragment() : Fragment() {
     private val TAG: String = "로그"
 
     private var pfList = ArrayList<Profiles>()
-    private lateinit var pfAdapter: RecyclerViewAdapter
+    private lateinit var pfAdapter: RecyclerViewAdapterFrag1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "CalendarFragment - onCreate() called")
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         // Inflate the layout for this fragment (view binding)
         _binding = FragmentCalendarBinding.inflate(inflater, container, false)
         return binding.root
@@ -40,7 +40,7 @@ class CalendarFragment() : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d(tag, "CalendarFragment - onViewCreated() called")
+        Log.d(TAG, "CalendarFragment - onViewCreated() called")
 
         try{
             for(i in 1..10){
@@ -49,10 +49,10 @@ class CalendarFragment() : Fragment() {
             }
 
             // 어댑터 인스턴스 생성
-            pfAdapter = RecyclerViewAdapter()
+            pfAdapter = RecyclerViewAdapterFrag1()
             pfAdapter.submitList(this.pfList)
 
-            binding.rvProfiles.apply{
+            binding.rvFragCalendar.rvProfiles.apply{
                 // RecyclerView 방향 등 설정
                 layoutManager = LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL,false)
                 setHasFixedSize(true)
@@ -62,7 +62,7 @@ class CalendarFragment() : Fragment() {
             }
 
             // calendar view
-            binding.cv?.setOnDateChangeListener { view, year, month, dayOfMonth ->
+            binding.cv.setOnDateChangeListener { view, year, month, dayOfMonth ->
                 /* months are indexed from 0. So, 0 means January, 1 means february, 2 means march etc. */
 
                 val msg = "Selected date is " + dayOfMonth + "/" + (month + 1) + "/" + year
@@ -70,7 +70,7 @@ class CalendarFragment() : Fragment() {
             }
 
         }catch (e : java.lang.NullPointerException) {
-            Log.d(tag, "onViewCreated()", e)
+            Log.d(TAG, "onViewCreated()", e)
         }
 
     }
@@ -85,13 +85,13 @@ class CalendarFragment() : Fragment() {
             AlertDialog.Builder(App.instance)
                 .setTitle(title)
                 .setMessage("$title 클릭됨")
-                .setPositiveButton("OK"){ _, id ->
-                    Log.d(tag, "FriendsRV - dialog 확인 버튼 clicked")
+                .setPositiveButton("OK"){ _, _ ->
+                    Log.d(TAG, "FriendsRV - dialog 확인 버튼 clicked")
                 }
                 .show()
 
         }catch (e : NullPointerException) {
-            Log.d(tag, "onItemClicked()", e)
+            Log.d(TAG, "onItemClicked()", e)
         }
     }
 

@@ -10,11 +10,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_profiles"
+<!--        <androidx.recyclerview.widget.RecyclerView-->
+<!--            android:id="@+id/rv_profiles"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:scrollbars="horizontal"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="parent" />-->
+
+        <include
+            android:id="@+id/rv_frag_calendar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="horizontal"
+            layout="@layout/rv_friendlist"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -25,28 +34,29 @@
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/rv_profiles" />
+            app:layout_constraintTop_toBottomOf="@id/rv_frag_calendar" />
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/text_calendar_memo"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="20dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cv">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="10dp"
-                android:text="입력된 내용이 없습니다"
-                android:textAlignment="center"
-                android:textSize="20sp" />
-            <!--  나중에 text에 입력될 내용 layout 참조하기 -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/text_calendar_memo"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="20dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/cv">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="10dp"
+                        android:text="입력된 내용이 없습니다"
+                        android:textAlignment="center"
+                        android:textSize="20sp" />
+                    <!--  나중에 text에 입력될 내용 layout 참조하기 -->
             <!--                android:textAppearance=""-->
 
         </androidx.cardview.widget.CardView>

@@ -3,4 +3,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="text_addr">위치를 등록하세요</string>
+    <string name="frdt">2021.07.27</string>
+    <string name="todt">2021.07.27</string>
+    <string name="trip_title">일정 제목</string>
 </resources>

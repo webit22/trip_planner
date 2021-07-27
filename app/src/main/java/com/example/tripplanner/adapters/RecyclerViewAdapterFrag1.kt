@@ -9,9 +9,10 @@ import com.example.tripplanner.App
 import com.example.tripplanner.R
 import com.example.tripplanner.fragment1.ProfileViewHolder
 import com.example.tripplanner.fragment1.Profiles
+import com.example.tripplanner.fragment2.Trips
 
 //data model을 담는 profileList (그릇)
-class RecyclerViewAdapter : RecyclerView.Adapter<ProfileViewHolder>(){
+class RecyclerViewAdapterFrag1 : RecyclerView.Adapter<ProfileViewHolder>(){
 
     private val TAG: String = "로그"
     private var itemList = ArrayList<Profiles>()
@@ -19,7 +20,7 @@ class RecyclerViewAdapter : RecyclerView.Adapter<ProfileViewHolder>(){
     // 뷰홀더가 생성 되었을 때 (set the view to display its contents)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProfileViewHolder {
         // 연결할 레이아웃 설정 (recycler view item layout)
-        val v = LayoutInflater.from(parent.context).inflate(R.layout.activity_main_rv_item, parent, false)
+        val v = LayoutInflater.from(parent.context).inflate(R.layout.fragment_calendar_rv_item, parent, false)
         return ProfileViewHolder(v)
     }
 
