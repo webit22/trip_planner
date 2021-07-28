@@ -11,16 +11,10 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
--keep public class com.example.tripplanner.DaumPostalCD$AndroidBridge
--keep public class * implements com.example.tripplanner.DaumPostalCD$AndroidBridge
--keepclassmembers class * implements com.example.tripplanner.DaumPostalCD$AndroidBridge{
-     <methods>;
-}
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable
--keepattributes JavascriptInterface
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.

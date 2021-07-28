@@ -42,7 +42,7 @@ class DaumPostalCD : AppCompatActivity(){
 
             //javascript에서 인터페이스 호출 시 이름 "Android" 사용
             addJavascriptInterface(AndroidBridge(this), "Android")
-            loadUrl("http://localhost/android_asset/daum.html") //local web server > 주소검색 파일
+            loadUrl("http://localhost/android_asset/daum.php") //local web server > 주소검색 파일
         }
 
     }
@@ -50,7 +50,7 @@ class DaumPostalCD : AppCompatActivity(){
     // proguard rules 바꿈
     public class AndroidBridge(mContext: WebView){
         // 주소 세팅하는 메서드
-        // 자꾸 setAddress()를 호출하지 못함 - proguard rules 수정 필요함
+        // setAddress()를 호출하지 못함 - proguard rules 수정 필요 (JavascriptInterface 연결이 안됨)
 
         @JavascriptInterface
         fun setAddress(arg1: String, arg2: String, arg3: String){
