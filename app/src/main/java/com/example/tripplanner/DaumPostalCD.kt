@@ -2,6 +2,7 @@ package com.example.tripplanner
 
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -30,6 +31,7 @@ class DaumPostalCD : AppCompatActivity(){
     /* 주소 검색창 띄우기 */
     @SuppressLint("SetJavaScriptEnabled")
     private fun openPage(){
+        val link = "http://192.168.35.186/android_asset/addr.html"
         /* webview 초기화 */
         binding.webView.apply{
             settings.javaScriptEnabled = true  // javascript 허용
@@ -38,17 +40,15 @@ class DaumPostalCD : AppCompatActivity(){
             webViewClient = WebViewClient()
             webChromeClient = WebChromeClient()
 
-            webViewClient.onPageFinished(this, "javascript:execDaumPostcode()")
-
             //javascript에서 인터페이스 호출 시 이름 "Android" 사용
-            addJavascriptInterface(AndroidBridge(this), "Android")
-            loadUrl("http://localhost/android_asset/daum.php") //local web server > 주소검색 파일
+            addJavascriptInterface(AndroidBridge(), "Android")
+            loadUrl(link) //local web server > 주소검색 파일
         }
 
     }
 
     // proguard rules 바꿈
-    public class AndroidBridge(mContext: WebView){
+    public class AndroidBridge{
         // 주소 세팅하는 메서드
         // setAddress()를 호출하지 못함 - proguard rules 수정 필요 (JavascriptInterface 연결이 안됨)
 
@@ -74,11 +74,7 @@ class DaumPostalCD : AppCompatActivity(){
 //                startActivity(intent)
 //                finish()
 //            }
-
         }
-    }
-    companion object{
-        val handler = Handler()
     }
 
     override fun onBackPressed() {
