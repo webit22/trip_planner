@@ -4,26 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.CalendarFragment">
+    tools:context=".fragment1.CalendarFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-<!--        <androidx.recyclerview.widget.RecyclerView-->
-<!--            android:id="@+id/rv_profiles"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:scrollbars="horizontal"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent" />-->
-
         <include
             android:id="@+id/rv_frag_calendar"
+            layout="@layout/rv_friendlist"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            layout="@layout/rv_friendlist"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -36,50 +27,85 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/rv_frag_calendar" />
 
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardview_calendar_memo"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cv">
 
-                <androidx.cardview.widget.CardView
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin = "10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/text_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SelectedDate"/>
+
+                <EditText
                     android:id="@+id/text_calendar_memo"
                     android:layout_width="match_parent"
-                    android:layout_height="100dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    app:cardCornerRadius="10dp"
-                    app:cardElevation="20dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/cv">
+                    android:layout_height="match_parent"
+                    android:inputType="textMultiLine"
+                    android:padding="10dp"
+                    android:textSize="15sp" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:padding="10dp"
-                        android:text="입력된 내용이 없습니다"
-                        android:textAlignment="center"
-                        android:textSize="20sp" />
-                    <!--  나중에 text에 입력될 내용 layout 참조하기 -->
-            <!--                android:textAppearance=""-->
+                <!-- 저장된 메모 내용 -->
+                <TextView
+                    android:id="@+id/text_savedmemo"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp"
+                    android:textSize="15sp"
+                    android:visibility="invisible" />
+
+            </LinearLayout>
+
+            <!-- 입력 시 보이는 메모 내용-->
+
 
         </androidx.cardview.widget.CardView>
+
+        <Button
+            android:id="@+id/btn_calendar_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="입력"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardview_calendar_memo" />
 
         <Button
             android:id="@+id/btn_calendar_update"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:text="내용 수정하기"
-            app:layout_constraintEnd_toStartOf="@id/btn_calendar_insert"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_calendar_memo" />
+            android:text="수정"
+            android:visibility="invisible"
+            app:layout_constraintBaseline_toBaselineOf="@+id/btn_calendar_save"
+            app:layout_constraintEnd_toStartOf="@id/btn_calendar_del"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <Button
-            android:id="@+id/btn_calendar_insert"
+            android:id="@+id/btn_calendar_del"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:text="새로 입력하기"
+            android:text="삭제"
+            android:visibility="invisible"
+            app:layout_constraintBaseline_toBaselineOf="@+id/btn_calendar_update"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/btn_calendar_update"
-            app:layout_constraintTop_toBottomOf="@id/text_calendar_memo" />
+            app:layout_constraintStart_toEndOf="@id/btn_calendar_update" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

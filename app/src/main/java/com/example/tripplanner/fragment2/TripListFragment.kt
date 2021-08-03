@@ -1,4 +1,4 @@
-package com.example.tripplanner.fragments
+package com.example.tripplanner.fragment2
 
 import android.os.Bundle
 import android.util.Log
@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tripplanner.adapters.RecyclerViewAdapterFrag2
 import com.example.tripplanner.databinding.FragmentTriplistBinding
-import com.example.tripplanner.fragment2.Trips
 
 class TripListFragment : Fragment() {
 

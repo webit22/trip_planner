@@ -47,7 +47,6 @@ class DaumPostalCD : AppCompatActivity(){
 
     }
 
-    // proguard rules 바꿈
     public class AndroidBridge{
         // 주소 세팅하는 메서드
         // setAddress()를 호출하지 못함 - proguard rules 수정 필요 (JavascriptInterface 연결이 안됨)
