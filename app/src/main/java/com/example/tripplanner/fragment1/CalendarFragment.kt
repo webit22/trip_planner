@@ -1,5 +1,6 @@
 package com.example.tripplanner.fragment1
 
+import android.app.Application
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -10,10 +11,14 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tripplanner.App
+import com.example.tripplanner.MainActivity
 import com.example.tripplanner.R
 import com.example.tripplanner.adapters.RecyclerViewAdapterFrag1
 import com.example.tripplanner.databinding.FragmentCalendarBinding
 import com.google.firebase.database.*
+import com.google.firebase.database.ktx.database
+import com.google.firebase.database.ktx.getValue
+import com.google.firebase.ktx.Firebase
 
 /* calendar 화면 구현 */
 class CalendarFragment : Fragment() {
@@ -136,31 +141,34 @@ class CalendarFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         // DB에서 데이터를 읽고 쓰기 위한 DataReference의 인스턴스
-        var mDatabase: DatabaseReference? = null
-        mDatabase = FirebaseDatabase.getInstance().reference
+        var mDatabase = Firebase.database
+        // mDatabase = FirebaseDatabase.getInstance().reference // getInstance()를 사용하여 데이터베이스의 인스턴스를 검색하고 쓰려는 위치를 참조
 
         // 아마 아직 여기 오류날 듯. 파베에서 text path를 추가 안해줌
-        val conditionRef = mDatabase.child("text") //.child()는 데이터가 있을 위치의 이름을 정해주는 것
+        // val conditionRef = mDatabase.child("text") //.child()는 데이터가 있을 위치의 이름을 정해주는 것
+        val mRef = mDatabase.getReference("text")
 
-        conditionRef.addValueEventListener(object : ValueEventListener {
-            // 데이터의 값이 변했을 때마다 작동
+        mRef.addValueEventListener(object : ValueEventListener {
+            // 데이터의 값이 변할 때마다 작동
             override fun onDataChange(snapshot: DataSnapshot) {
-                val text : String = snapshot.getValue(String::class.java).toString()
+                val text = snapshot.getValue<String>()
                 setVisModeTwo()
 
                 // edittext에 입력한 내용을 textMemo에 전달
                 binding.textMemo.text = text
+                Log.d(TAG, "CalendarFragment - Value : $text")
+                Toast.makeText(App.instance, "입력 되었습니다", Toast.LENGTH_SHORT).show()
             }
 
             // 에러가 날 때 작동
             override fun onCancelled(error: DatabaseError) {
-
+                Log.w(TAG, "CalendarFragment - Failed to read value.", error.toException())
             }
         })
 
         // btnSave 클릭 시 text가 DB의 "text" path에 저장됨
         binding.btnSave.setOnClickListener{
-            conditionRef.setValue(binding.edittext.text.toString())
+            mRef.setValue(binding.edittext.text.toString())
         }
     }
 
