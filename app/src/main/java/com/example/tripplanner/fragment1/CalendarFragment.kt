@@ -1,6 +1,5 @@
 package com.example.tripplanner.fragment1
 
-import android.content.Context.MODE_NO_LOCALIZED_COLLATORS
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -14,8 +13,7 @@ import com.example.tripplanner.App
 import com.example.tripplanner.R
 import com.example.tripplanner.adapters.RecyclerViewAdapterFrag1
 import com.example.tripplanner.databinding.FragmentCalendarBinding
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import com.google.firebase.database.*
 
 /* calendar 화면 구현 */
 class CalendarFragment : Fragment() {
@@ -27,9 +25,6 @@ class CalendarFragment : Fragment() {
 
     private var pfList = ArrayList<Profiles>()
     private lateinit var pfAdapter: RecyclerViewAdapterFrag1
-
-    var fname: String = ""
-    var str: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +65,13 @@ class CalendarFragment : Fragment() {
                 adapter = pfAdapter
             }
 
-            setMemo() // calendar view
+            setMemo()
+
+            if(binding.textMemo.text == "" || binding.textMemo.text == null){
+                setVisModeOne()
+            }else{
+                setVisModeTwo()
+            }
 
         } catch (e: java.lang.NullPointerException) {
             Log.d(TAG, "onViewCreated()", e)
@@ -109,13 +110,6 @@ class CalendarFragment : Fragment() {
             /* months are indexed from 0. So, 0 means January, 1 means february, 2 means march etc. */
             var strDate: String = ""
 
-            this.binding.textDate.visibility = View.VISIBLE
-            binding.textCalendarMemo.visibility = View.VISIBLE
-            binding.textSavedmemo.visibility = View.INVISIBLE// 저장된 메모 textview2 Invisible
-            binding.btnCalendarSave.visibility = View.VISIBLE
-            binding.btnCalendarUpdate.visibility = View.INVISIBLE // 수정 Button Invisible
-            binding.btnCalendarDel.visibility = View.INVISIBLE // 삭제 Button Invisible
-
             // textDate에 해당 날짜 보임
             if (month < 9) {
                 if (dayOfMonth < 10) { // 일 - 한 자리
@@ -134,116 +128,59 @@ class CalendarFragment : Fragment() {
                     binding.textDate.text = strDate
                 }
             }
-
-            binding.textCalendarMemo.setText("") // EditText에 공백값 넣기
-            checkedDay(strDate)
-        }
-
-        // 저장 버튼 클릭 시
-        binding.btnCalendarSave.setOnClickListener {
-            saveMemo(fname) // saveMemo 메서드 호출
-            Toast.makeText(this, fname + "데이터를 저장했습니다.", Toast.LENGTH_SHORT).show() // 토스트 메세지
-            str = binding.textCalendarMemo.text.toString()
-
-            binding.textSavedmemo.text = str // textView에 str 출력
-            binding.textCalendarMemo.visibility = View.INVISIBLE
-            binding.textSavedmemo.visibility = View.VISIBLE
-            binding.btnCalendarSave.visibility = View.INVISIBLE // 저장 버튼 Invisible
-            binding.btnCalendarUpdate.visibility = View.VISIBLE
-            binding.btnCalendarDel.visibility = View.VISIBLE
-
+            binding.edittext.setText("") // EditText에 공백값 넣기
         }
     }
 
-    fun checkedDay(paraDate : String) {
-        var fis: FileInputStream? = null // FileStream fis 변수 설정
+    // DB에 data 읽고 쓰기, btnSave 클릭 시 실행
+    override fun onStart() {
+        super.onStart()
+        // DB에서 데이터를 읽고 쓰기 위한 DataReference의 인스턴스
+        var mDatabase: DatabaseReference? = null
+        mDatabase = FirebaseDatabase.getInstance().reference
 
-        val yr = paraDate.substring(0, 3)
-        val m = paraDate.substring(6, 7)
-        val d = paraDate.substring(10, 11)
-        var date : String = ""
+        // 아마 아직 여기 오류날 듯. 파베에서 text path를 추가 안해줌
+        val conditionRef = mDatabase.child("text") //.child()는 데이터가 있을 위치의 이름을 정해주는 것
 
-        date = String.format("%s%s%s", yr, m, d)
-        fname = "$date.txt" // 저장할 파일 이름 설정 : 20190120.txt
+        conditionRef.addValueEventListener(object : ValueEventListener {
+            // 데이터의 값이 변했을 때마다 작동
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val text : String = snapshot.getValue(String::class.java).toString()
+                setVisModeTwo()
 
-        try{
-            fis = openFileInput(fname) // fname 파일 오픈
-
-            val fileData = fis?.let { ByteArray(it.available()) } // fileData - byte 형식으로 저장
-            if (fis != null) {
-                fis.read(fileData) // byte 형식 파일을 읽음
-                fis.close()
+                // edittext에 입력한 내용을 textMemo에 전달
+                binding.textMemo.text = text
             }
 
-            str = fileData?.let { String(it) }.toString() // str 변수에 fileData를 저장
+            // 에러가 날 때 작동
+            override fun onCancelled(error: DatabaseError) {
 
-            binding.textCalendarMemo.visibility = View.INVISIBLE
-            binding.textSavedmemo.visibility = View.VISIBLE
-            binding.textSavedmemo.text = str // textView에 str 출력
-            binding.btnCalendarSave.visibility = View.INVISIBLE
-            binding.btnCalendarUpdate.visibility = View.VISIBLE
-            binding.btnCalendarDel.visibility = View.VISIBLE
-
-            binding.btnCalendarUpdate.setOnClickListener { // 수정 버튼을 누를 시
-                binding.textCalendarMemo.visibility = View.VISIBLE
-                binding.textSavedmemo.visibility = View.INVISIBLE
-                binding.textCalendarMemo.setText(str) // editText에 textView에 저장된 내용 출력
-
-                binding.btnCalendarSave.visibility = View.VISIBLE
-                binding.btnCalendarUpdate.visibility = View.INVISIBLE
-                binding.btnCalendarDel.visibility = View.INVISIBLE
-                binding.textSavedmemo.text = "${binding.textCalendarMemo.text}"
             }
+        })
 
-            binding.btnCalendarDel.setOnClickListener {
-                binding.textSavedmemo.visibility = View.INVISIBLE
-                binding.textCalendarMemo.setText("")
-                binding.textCalendarMemo.visibility = View.VISIBLE
-                binding.btnCalendarSave.visibility = View.VISIBLE
-                binding.btnCalendarUpdate.visibility = View.INVISIBLE
-                binding.btnCalendarDel.visibility = View.INVISIBLE
-                delMemo(fname)
-                Toast.makeText(this, fname + "데이터를 삭제했습니다.")
-            }
-
-            if(binding.textSavedmemo.text == ""){
-                binding.textSavedmemo.visibility = View.INVISIBLE
-                binding.textDate.visibility = View.VISIBLE
-                binding.btnCalendarSave.visibility = View.VISIBLE
-                binding.btnCalendarUpdate.visibility = View.INVISIBLE
-                binding.btnCalendarDel.visibility = View.INVISIBLE
-                binding.textCalendarMemo.visibility = View.VISIBLE
-            }
-        }catch (e: Exception) {
-            e.printStackTrace()
+        // btnSave 클릭 시 text가 DB의 "text" path에 저장됨
+        binding.btnSave.setOnClickListener{
+            conditionRef.setValue(binding.edittext.text.toString())
         }
     }
 
-    private fun saveMemo(para : String){
-        var fos: FileOutputStream? = null
+    /* memo 입력 전 상태 */
+    fun setVisModeOne(){
+        binding.edittext.visibility = View.VISIBLE
+        binding.btnSave.visibility = View.VISIBLE
 
-        try {
-            fos = openFileOutput(para, MODE_NO_LOCALIZED_COLLATORS)
-            var content: String = binding.textCalendarMemo.text.toString()
-            fos?.write(content.toByteArray())
-            fos?.close()
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-    private fun delMemo(para: String) {
-        var fos: FileOutputStream? = null
-
-        try {
-            fos = openFileOutput(para, MODE_NO_LOCALIZED_COLLATORS)
-            var content: String = ""
-            fos?.write(content.toByteArray())
-            fos?.close()
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        binding.textMemo.visibility = View.INVISIBLE
+        binding.btnUpdate.visibility = View.INVISIBLE
+        binding.btnDel.visibility = View.INVISIBLE
     }
 
+    /* memo 입력 후 상태 */
+    fun setVisModeTwo(){
+        binding.edittext.visibility = View.INVISIBLE
+        binding.btnSave.visibility = View.INVISIBLE
+
+        binding.textMemo.visibility = View.VISIBLE
+        binding.btnUpdate.visibility = View.VISIBLE
+        binding.btnDel.visibility = View.VISIBLE
+    }
 }

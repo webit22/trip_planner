@@ -52,16 +52,17 @@
                     android:text="SelectedDate"/>
 
                 <EditText
-                    android:id="@+id/text_calendar_memo"
+                    android:id="@+id/edittext"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:inputType="textMultiLine"
                     android:padding="10dp"
+                    android:autofillHints="내용을 입력하세요"
                     android:textSize="15sp" />
 
                 <!-- 저장된 메모 내용 -->
                 <TextView
-                    android:id="@+id/text_savedmemo"
+                    android:id="@+id/text_memo"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:padding="10dp"
@@ -76,7 +77,7 @@
         </androidx.cardview.widget.CardView>
 
         <Button
-            android:id="@+id/btn_calendar_save"
+            android:id="@+id/btn_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
@@ -86,26 +87,26 @@
             app:layout_constraintTop_toBottomOf="@id/cardview_calendar_memo" />
 
         <Button
-            android:id="@+id/btn_calendar_update"
+            android:id="@+id/btn_update"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:text="수정"
             android:visibility="invisible"
-            app:layout_constraintBaseline_toBaselineOf="@+id/btn_calendar_save"
-            app:layout_constraintEnd_toStartOf="@id/btn_calendar_del"
+            app:layout_constraintBaseline_toBaselineOf="@+id/btn_save"
+            app:layout_constraintEnd_toStartOf="@id/btn_del"
             app:layout_constraintStart_toStartOf="parent" />
 
         <Button
-            android:id="@+id/btn_calendar_del"
+            android:id="@+id/btn_del"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:text="삭제"
             android:visibility="invisible"
-            app:layout_constraintBaseline_toBaselineOf="@+id/btn_calendar_update"
+            app:layout_constraintBaseline_toBaselineOf="@+id/btn_update"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/btn_calendar_update" />
+            app:layout_constraintStart_toEndOf="@id/btn_update" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
