@@ -75,10 +75,10 @@ dependencies {
 
     // Import the BoM for the Firebase platform
     implementation platform('com.google.firebase:firebase-bom:28.2.1')
-    // Firebase SDK for Google Analytics
-    implementation 'com.google.firebase:firebase-analytics-ktx'
-    // Realtime Database library. When using the BoM, you don't specify versions in Firebase library dependencies
-    implementation 'com.google.firebase:firebase-database-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx' // Firebase SDK for Google Analytics
+    implementation 'com.google.firebase:firebase-database-ktx' // Realtime Database library
+    implementation 'com.google.firebase:firebase-auth-ktx' // Authentication library
+    implementation 'com.google.android.gms:play-services-auth:19.2.0' // Google Play services library
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

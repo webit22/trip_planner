@@ -20,12 +20,9 @@ class SplashActivity : AppCompatActivity() {
         val time : Long = 2000 // 2 seconds delay time
         val handler = Handler()
         handler.postDelayed({
-
-            /* MainAct -> LoginAct로 변경하기 */
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
-
         }, time)
 
 
