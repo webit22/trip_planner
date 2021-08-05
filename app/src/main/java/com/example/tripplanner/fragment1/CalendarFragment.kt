@@ -73,15 +73,16 @@ class CalendarFragment : Fragment() {
             setMemo()
 
             if(binding.textMemo.text == "" || binding.textMemo.text == null){
+                Log.d(TAG, "CalendarFragment - ModeOne called")
                 setVisModeOne()
             }else{
+                Log.d(TAG, "CalendarFragment - ModeTwo called")
                 setVisModeTwo()
             }
 
         } catch (e: java.lang.NullPointerException) {
-            Log.d(TAG, "onViewCreated()", e)
+            Log.w(TAG, "onViewCreated()", e)
         }
-
     }
 
     /* 친구프로필 클릭 시 실행 */
