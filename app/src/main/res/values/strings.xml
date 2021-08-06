@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">TripPlanner</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="text_addr">위치를 등록하세요</string>
     <string name="frdt">2021.07.27</string>
@@ -10,4 +9,7 @@
     <string name="kakao">카카오톡으로 로그인</string>
     <string name="signup">회원가입</string>
     <string name="nosignup">비회원으로 진행</string>
+
+    <!-- 네이티브 앱 키 -->
+    <string name="kakao_app_key">b6a5c39bd3995120b816c7ea7d693068</string>
 </resources>

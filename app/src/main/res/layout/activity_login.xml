@@ -23,20 +23,19 @@
         app:layout_constraintBottom_toTopOf="@id/btn_kakaoLogin"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/logo">
-    </com.google.android.gms.common.SignInButton>
+        app:layout_constraintTop_toBottomOf="@id/logo" />
 
-    <Button
+
+    <ImageView
         android:id="@+id/btn_kakaoLogin"
         android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#AB5CB2F6"
-        android:text="@string/kakao"
+        android:layout_height="50dp"
+        android:src="@drawable/kakao_login_button"
         android:layout_marginBottom="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_googleLogin"/>
+        app:layout_constraintTop_toBottomOf="@+id/btn_googleLogin" />
 
     <TextView
         android:id="@+id/text_signup"

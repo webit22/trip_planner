@@ -1,10 +1,9 @@
 package com.example.tripplanner
 
 import android.app.Application
-import com.bumptech.glide.Glide.init
 import com.kakao.sdk.common.KakaoSdk
 
-// 전역으로 사용가능한 context
+// 전역으로 사용 가능한 context (GlobalApplication)
 class App : Application() {
 
     //singleton 사용
@@ -15,9 +14,8 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        instance = this
-
         // 카카오 SDK 초기화
-        KakaoSdk.init(this, "b6a5c39bd3995120b816c7ea7d693068")
+        KakaoSdk.init(this, getString(R.string.kakao_app_key))
+        instance = this
     }
 }

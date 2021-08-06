@@ -32,7 +32,20 @@
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"
-            android:value="b6a5c39bd3995120b816c7ea7d693068" />
+            android:value="@string/kakao_app_key" />
+
+        <activity android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- Redirect URI: "kakao{NATIVE_APP_KEY}://oauth" -->
+                <data android:host="oauth"
+                    android:scheme="kakaob6a5c39bd3995120b816c7ea7d693068" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>
