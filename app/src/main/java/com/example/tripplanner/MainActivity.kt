@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.GravityCompat
+import com.bumptech.glide.Glide
 import com.example.tripplanner.R.id.btn_navi
 import com.example.tripplanner.R.id.text_addr
 import com.example.tripplanner.adapters.ViewPagerAdapter
@@ -17,6 +18,9 @@ import com.example.tripplanner.databinding.ActivityMainBinding
 import com.example.tripplanner.fragments.ZoomOutPageTransformer
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
+import com.kakao.sdk.auth.model.OAuthToken
+import com.kakao.sdk.user.UserApiClient
+import org.w3c.dom.Text
 import com.example.tripplanner.R.id.activity_main_layout_toolbar as activity_main_layout_toolbar
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -43,11 +47,44 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_baseline_menu_24) // 홈버튼 이미지 변경
 
         setUpPages()
+        // setProfile() // 사용자가 로그인 되어있는지 확인 + 프로필 설정
 
         Log.d(TAG, "MainActivity - onCreate() called")
+
         onClickBtnNavi()
         onClickLocation()
+
     }
+
+    /* Login 후에 profile, nickname이 네비에 보이게 */
+/*
+    private fun setProfile(){
+        val uProfile = findViewById<ImageView>(R.id.profilepic)
+        val uName = findViewById<TextView>(R.id.text_username)
+        val uEmail = findViewById<TextView>(R.id.text_userEmail)
+
+        UserApiClient.instance.me { user, error ->
+            if(user != null){ // login succeeded
+                Log.i(TAG, "MainActivity - invoke : id = ${user.id}")
+                Log.i(TAG, "MainActivity - invoke : email = ${user.kakaoAccount?.email}")
+                Log.i(TAG, "MainActivity - invoke : nickname = ${user.kakaoAccount?.profile?.nickname}")
+
+                // Navi bar profile setting
+                uName.text = user.kakaoAccount?.profile?.nickname
+                uEmail.text = user.kakaoAccount?.email
+                Glide.with(uProfile).load(user.kakaoAccount?.profile?.thumbnailImageUrl).circleCrop().into(uProfile)
+
+            }else{ // 로그인 실패
+                uName.text = null
+                uProfile.setImageBitmap(null)
+                // 로그인 화면 넘어가지 않도록?
+            }
+            //if(throw != null){
+            //    Log.w(TAG, "invoke: ${throw.getLocalizedMessage}")
+            //}
+        }
+    }
+*/
 
     /* 상단 메뉴 버튼 클릭 시 Navigation tab 열림 */
     private fun onClickBtnNavi(){
@@ -72,6 +109,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.layoutDrawer.closeDrawers()
         return false
     }
+
 
     /* 주소 입력 activity로 넘어가기 (intent) */
     private fun onClickLocation(){

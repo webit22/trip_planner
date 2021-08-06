@@ -4,7 +4,11 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Android_Projects/FINAL/trip_planner/app/src/main/res/layout/activity_login.xml" value="0.264" />
+        <entry key="..\:/Android_Projects/FINAL/trip_planner/app/src/main/res/layout/activity_main.xml" value="0.2" />
+        <entry key="..\:/Android_Projects/FINAL/trip_planner/app/src/main/res/layout/activity_main_drawer_header.xml" value="0.25364583333333335" />
+        <entry key="..\:/Android_Projects/FINAL/trip_planner/app/src/main/res/layout/activity_main_toolbar.xml" value="0.25364583333333335" />
         <entry key="..\:/Android_Projects/FINAL/trip_planner/app/src/main/res/layout/fragment_calendar.xml" value="0.264" />
+        <entry key="..\:/Android_Projects/FINAL/trip_planner/app/src/main/res/menu/activity_main_drawer_navigation.xml" value="0.25364583333333335" />
       </map>
     </option>
   </component>

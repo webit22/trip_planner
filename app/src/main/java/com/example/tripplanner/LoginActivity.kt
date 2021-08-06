@@ -67,8 +67,6 @@ class LoginActivity : AppCompatActivity() {
     }
 
 
-
-
     /* GOOGLE LOGIN */
     fun googleLoginStart(){
         Log.d(TAG, "LoginActivity - googleLoginStart() called")
