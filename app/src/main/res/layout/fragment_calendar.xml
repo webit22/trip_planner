@@ -42,14 +42,14 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin = "10dp"
+                android:layout_margin="15dp"
                 android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/text_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="SelectedDate"/>
+                    android:text="SelectedDate" />
 
                 <EditText
                     android:id="@+id/edittext"
@@ -57,22 +57,19 @@
                     android:layout_height="match_parent"
                     android:inputType="textMultiLine"
                     android:padding="10dp"
-                    android:autofillHints="내용을 입력하세요"
-                    android:textSize="15sp" />
+                    android:hint="내용을 입력하세요"
+                    android:textSize="15sp"
+                    android:visibility="visible" />
 
-                <!-- 저장된 메모 내용 -->
                 <TextView
                     android:id="@+id/text_memo"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:padding="10dp"
                     android:textSize="15sp"
-                    android:visibility="invisible" />
+                    android:visibility="gone" />
 
             </LinearLayout>
-
-            <!-- 입력 시 보이는 메모 내용-->
-
 
         </androidx.cardview.widget.CardView>
 
@@ -87,26 +84,28 @@
             app:layout_constraintTop_toBottomOf="@id/cardview_calendar_memo" />
 
         <Button
+            android:id="@+id/btn_del"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="60dp"
+            android:layout_marginTop="5dp"
+            android:text="삭제"
+            android:visibility="gone"
+            app:layout_constraintBaseline_toBaselineOf="@+id/btn_save"
+            app:layout_constraintEnd_toStartOf="@id/btn_save"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
             android:id="@+id/btn_update"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
+            android:layout_marginEnd="60dp"
             android:text="수정"
-            android:visibility="invisible"
+            android:visibility="gone"
             app:layout_constraintBaseline_toBaselineOf="@+id/btn_save"
-            app:layout_constraintEnd_toStartOf="@id/btn_del"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <Button
-            android:id="@+id/btn_del"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="삭제"
-            android:visibility="invisible"
-            app:layout_constraintBaseline_toBaselineOf="@+id/btn_update"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/btn_update" />
+            app:layout_constraintStart_toEndOf="@id/btn_save" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

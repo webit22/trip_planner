@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     /* Login 후에 profile, nickname이 네비에 보이게 */
-/*
+/* 참고 : https://blog.naver.com/woo171tm/221461720960
     private fun setProfile(){
         val uProfile = findViewById<ImageView>(R.id.profilepic)
         val uName = findViewById<TextView>(R.id.text_username)

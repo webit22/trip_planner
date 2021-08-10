@@ -65,7 +65,7 @@
             android:layout_marginTop="5dp"
             android:layout_marginEnd="75dp"
             android:paddingStart="15dp"
-            android:text="ID No."
+            android:text="#혼자하는여행"
             android:textColor="@color/white"
             android:textSize="15dp" />
 

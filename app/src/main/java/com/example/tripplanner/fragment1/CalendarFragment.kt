@@ -1,30 +1,25 @@
 package com.example.tripplanner.fragment1
 
-import android.app.Application
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.viewbinding.ViewBindings
-import com.example.tripplanner.App
-import com.example.tripplanner.MainActivity
+import com.example.tripplanner.*
 import com.example.tripplanner.R
-import com.example.tripplanner.Users
 import com.example.tripplanner.adapters.RecyclerViewAdapterFrag1
 import com.example.tripplanner.databinding.FragmentCalendarBinding
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
-import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
-import com.kakao.sdk.common.KakaoSdk.redirectUri
 import com.kakao.sdk.user.UserApiClient
+import java.lang.NullPointerException
+import java.time.LocalDate
 
 /* calendar 화면 구현 */
 class CalendarFragment : Fragment() {
@@ -36,6 +31,8 @@ class CalendarFragment : Fragment() {
 
     private var pfList = ArrayList<Profiles>()
     private lateinit var pfAdapter: RecyclerViewAdapterFrag1
+
+    private val mDB = Firebase.database // main DB instance
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +60,7 @@ class CalendarFragment : Fragment() {
                 this.pfList.add(myModel) //Profiles()에 입력된 내용을 arraylist에 10번 넣음
             }
 
+            /* Friend List */
             // 어댑터 인스턴스 생성
             pfAdapter = RecyclerViewAdapterFrag1()
             pfAdapter.submitList(this.pfList)
@@ -76,37 +74,11 @@ class CalendarFragment : Fragment() {
                 adapter = pfAdapter
             }
 
-            //setMemo()
-
-            if(binding.textMemo.text == "" || binding.textMemo.text == null){
-                setVisModeOne()
-            }else{
-                setVisModeTwo()
-            }
-
-        } catch (e: java.lang.NullPointerException) {
-            Log.w(TAG, "onViewCreated()", e)
-        }
-    }
-
-    /* 친구프로필 클릭 시 실행 */
-    fun onProfileClicked(position: Int) {
-        Log.d(TAG, "CalendarFragment - onProfileClicked() called")
-        try {
-            /* listener를 통해 item 클릭 여부를 알게됨. RecyclerViewInterface 참고. */
-            // 값이 null이면 ""를 넣음. unwrapping.
-            val title: String = this.pfList[position].name ?: ""
-
-            AlertDialog.Builder(App.instance)
-                .setTitle(title)
-                .setMessage("$title 클릭됨")
-                .setPositiveButton("OK") { _, _ ->
-                    Log.d(TAG, "FriendsRV - dialog 확인 버튼 clicked")
-                }
-                .show()
+            /* CalendarView + Memo */
+            setCalendarView()
 
         } catch (e: NullPointerException) {
-            Log.d(TAG, "onItemClicked()", e)
+            Log.w(TAG, "onViewCreated()", e)
         }
     }
 
@@ -116,15 +88,16 @@ class CalendarFragment : Fragment() {
         super.onDestroyView()
     }
 
-    override fun onStart() {
-        super.onStart()
-        Log.d(TAG, "CalendarFragment - onStart() called")
-        // 달력 날짜 클릭 시
-        binding.cv.setOnDateChangeListener { view, year, month, dayOfMonth ->
-            /* months are indexed from 0. So, 0 means January, 1 means february, 2 means march etc. */
-            var strDate: String = ""
+    private fun setCalendarView(){
+        Log.d(TAG, "CalendarFragment - setCalendarView() called")
 
-            // textDate에 해당 날짜 보임
+        val dateToday: LocalDate = LocalDate.now()
+        binding.textDate.text = dateToday.toString() // .format("yyyy년 MM월 dd일")
+
+        // 달력 날짜 클릭 시
+        binding.cv.setOnDateChangeListener { _, year, month, dayOfMonth ->
+            /* months are indexed from 0. So, 0 means January, 1 means february, 2 means march etc. */
+            val strDate: String
             if (month < 9) {
                 if (dayOfMonth < 10) { // 일 - 한 자리
                     strDate = "" + year + "년 " + 0 + (month + 1) + "월 " + 0 + dayOfMonth + "일"
@@ -142,87 +115,122 @@ class CalendarFragment : Fragment() {
                     binding.textDate.text = strDate
                 }
             }
+            readData(strDate) // DB에서 memo 값 읽어오기
         }
-        saveMemo()
     }
 
+    /* DB - DB에서 Data 불러와서 읽음 */
+    private fun readData(strDate: String){
+        val date: String = strDate.substring(0,4) + strDate.substring(6,8) + strDate.substring(10,12)
+        val mRef = mDB.getReference("Users/1838254010/$date")
 
-    // DB에 data 읽고 쓰기, btnSave 클릭 시 실행
-    fun saveMemo() {
-
-        Log.d(TAG, "CalendarFragment - saveMemo() called")
-
-        var userName : String? = null
-        val date = binding.textDate.text.toString()
-        val memo = binding.edittext.text.toString()
-
-        UserApiClient.instance.me { user, error ->
-            if (user != null) { // login succeeded
-                userName = user.kakaoAccount?.profile?.nickname
-            } else { // 로그인 실패
-                userName = "Anonymous"
-            }
-        }
-
-        val mDB = Firebase.database // DB에서 데이터를 읽고 쓰기 위한 DataReference의 인스턴스
-        val mRef = mDB.getReference("Users")
-
-        if(date.isNotEmpty() && memo.isNotEmpty()){
-            val tripInfo = Users(date, memo)
-            userName?.let {
-                mRef.child(it).setValue(tripInfo).addOnCompleteListener {
-                    binding.edittext.setText("") // EditText에 공백값 넣기
-                    Toast.makeText(App.instance, "Successfully saved", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        mRef.addValueEventListener(object : ValueEventListener {
-            // 데이터의 값이 변할 때마다 작동
+        mRef.addValueEventListener(object: ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
-                val text = snapshot.getValue<String>()
+                if(snapshot.exists()){
+                    val memo = snapshot.child("memo").value
 
-                if(text != null){
-                    Log.d(TAG, "Value : $text")
-                    Toast.makeText(App.instance, "입력 되었습니다", Toast.LENGTH_SHORT).show()
+                    Log.d(TAG, "date: $date memo: $memo")
 
+                    binding.textMemo.text = memo.toString() // set data to TextView
                     setVisModeTwo()
+
+                    // btnUpdate 클릭 시 DB에 값 수정
+                    binding.btnUpdate.setOnClickListener {
+                        updateData()
+                    }
+                    // btnDel 클릭 시 DB에 값 저장
+                    binding.btnDel.setOnClickListener {
+                        deleteData()
+                    }
+                }else{
+                    Toast.makeText(App.instance, "저장된 내용이 없음", Toast.LENGTH_SHORT).show()
+                    setVisModeOne()
+
+                    // btnSave 클릭 시 DB에 값 저장
+                    binding.btnSave.setOnClickListener{
+                        saveData()
+                    }
                 }
             }
 
-            // 에러가 날 때 작동
             override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "Failed to read value.", error.toException())
+                // data 읽어오기에 실패했을 때
+                Log.d(TAG, "Failed to read data")
             }
         })
 
-        // btnSave 클릭 시 text가 DB의 "text" path에 저장됨
-        binding.btnSave.setOnClickListener{
-            // 아직 date, memo 같이 저장되는거 해결 못함!!
-            mRef.setValue(binding.edittext.text.toString())
-            // mRef.setValue(Users)
-            binding.textMemo.text = binding.edittext.text // edittext에 입력한 내용을 textMemo에 전달
+    }
+
+    /* DB - Data 수정하고 DB에 저장 */
+    private fun updateData(){
+        /*
+        * 1. editText.text = textMemo.text
+        * 2. Mode1 호출
+        * 3. saveData() 호출
+        * */
+    }
+
+    /* DB - DB에서 Data 삭제 */
+    private fun deleteData(){
+        /*
+        * 1. Dialog 띄움
+        * 2. 확인 버튼 클릭 : DB에서 날짜 조회 > date, memo 삭제; Log.d(successfully deleted(date:$date))
+        * 3. 취소 버튼 클릭 : nothing occurs. Log.d(canceled)
+        * 4. Mode1 호출
+        * */
+    }
+
+    /* DB - Data 쓰고 DB에 저장 */
+    private fun saveData() {
+        Log.d(TAG, "CalendarFragment - saveData() called")
+
+        val temp: String = binding.textDate.text.toString()
+        val date: String = temp.substring(0,4) + temp.substring(6,8) + temp.substring(10,12)
+        val memo: String = binding.edittext.text.toString()
+        var uID: String? = null
+
+        val user = User(date, memo)
+        val mRef = mDB.getReference("Users")
+
+        UserApiClient.instance.me { user, error ->
+            if (user != null) {
+                uID = user.id.toString()
+            }else{
+                Log.w(TAG, "error: Cannot Find UserID", error)
+            }
+        }
+
+        mRef.child(uID!!).child(date).setValue(user).addOnSuccessListener {
+            binding.textMemo.text = memo
+            binding.edittext.text.clear()
+
+            Toast.makeText(App.instance, "Successfully saved", Toast.LENGTH_SHORT).show()
+            setVisModeTwo()
+
+        }.addOnFailureListener {
+            Toast.makeText(App.instance, "Failed", Toast.LENGTH_SHORT).show()
+            Log.d(TAG, "저장 실패")
         }
     }
 
     /* memo 입력 전 상태 */
-    fun setVisModeOne(){
+    private fun setVisModeOne(){
         Log.d(TAG, "CalendarFragment - Mode1 called")
 
         binding.edittext.visibility = View.VISIBLE
         binding.btnSave.visibility = View.VISIBLE
 
-        binding.textMemo.visibility = View.INVISIBLE
-        binding.btnUpdate.visibility = View.INVISIBLE
-        binding.btnDel.visibility = View.INVISIBLE
+        binding.textMemo.visibility = View.GONE
+        binding.btnUpdate.visibility = View.GONE
+        binding.btnDel.visibility = View.GONE
     }
 
     /* memo 입력 후 상태 */
-    fun setVisModeTwo(){
+    private fun setVisModeTwo(){
         Log.d(TAG, "CalendarFragment - Mode2 called")
 
-        binding.edittext.visibility = View.INVISIBLE
-        binding.btnSave.visibility = View.INVISIBLE
+        binding.edittext.visibility = View.GONE
+        binding.btnSave.visibility = View.GONE
 
         binding.textMemo.visibility = View.VISIBLE
         binding.btnUpdate.visibility = View.VISIBLE
