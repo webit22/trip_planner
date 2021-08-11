@@ -8,14 +8,25 @@ class App : Application() {
 
     //singleton 사용
     companion object{
-        lateinit var instance: App
-            private set
+        var instance : App? = null
     }
 
     override fun onCreate() {
         super.onCreate()
         // 카카오 SDK 초기화
-        KakaoSdk.init(this, getString(R.string.kakao_app_key))
+        // KakaoSdk.init(this, getString(R.string.kakao_app_key))
+        KakaoSdk.init(this, KakaoSdkAdapter().toString())
         instance = this
+    }
+
+    override fun onTerminate() {
+        super.onTerminate()
+        instance = null
+    }
+    fun getAppContext() : App{
+        checkNotNull(instance){
+            "This Application does not inherit com.kakao.App"
+        }
+        return instance!!
     }
 }

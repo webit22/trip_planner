@@ -14,6 +14,7 @@ import com.example.tripplanner.adapters.RecyclerViewAdapterFrag1
 import com.example.tripplanner.databinding.FragmentCalendarBinding
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -31,8 +32,6 @@ class CalendarFragment : Fragment() {
 
     private var pfList = ArrayList<Profiles>()
     private lateinit var pfAdapter: RecyclerViewAdapterFrag1
-
-    private val mDB = Firebase.database // main DB instance
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,50 +114,111 @@ class CalendarFragment : Fragment() {
                     binding.textDate.text = strDate
                 }
             }
-            readData(strDate) // DB에서 memo 값 읽어오기
+            getData(strDate) // DB에서 memo 값 읽어오기
         }
     }
 
     /* DB - DB에서 Data 불러와서 읽음 */
-    private fun readData(strDate: String){
+    private fun getData(strDate: String){
         val date: String = strDate.substring(0,4) + strDate.substring(6,8) + strDate.substring(10,12)
-        val mRef = mDB.getReference("Users/1838254010/$date")
+        val mDB = Firebase.database // main DB instance
+        var mRef: DatabaseReference
 
-        mRef.addValueEventListener(object: ValueEventListener{
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if(snapshot.exists()){
-                    val memo = snapshot.child("memo").value
+        try{
+            UserApiClient.instance.me { user, error ->
+                if (error != null) {
+                    Log.e(TAG, "사용자 정보 요청 실패", error)
 
-                    Log.d(TAG, "date: $date memo: $memo")
+                }else if (user != null){
+                    Log.i(TAG, "사용자 정보 요청 성공\n  회원번호: ${user.id}")
+                    mRef = mDB.getReference("Users/${user.id}/${date}")
 
-                    binding.textMemo.text = memo.toString() // set data to TextView
-                    setVisModeTwo()
+                    mRef.addValueEventListener(object: ValueEventListener{
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if(snapshot.exists()){
+                                val memo = snapshot.child("memo").value
 
-                    // btnUpdate 클릭 시 DB에 값 수정
-                    binding.btnUpdate.setOnClickListener {
-                        updateData()
-                    }
-                    // btnDel 클릭 시 DB에 값 저장
-                    binding.btnDel.setOnClickListener {
-                        deleteData()
-                    }
-                }else{
-                    Toast.makeText(App.instance, "저장된 내용이 없음", Toast.LENGTH_SHORT).show()
-                    setVisModeOne()
+                                Log.d(TAG, "date: $date memo: $memo")
 
-                    // btnSave 클릭 시 DB에 값 저장
-                    binding.btnSave.setOnClickListener{
-                        saveData()
+                                binding.textMemo.text = memo.toString() // set data to TextView
+                                setVisModeTwo()
+
+                                // btnUpdate 클릭 시 DB에 값 수정
+                                binding.btnUpdate.setOnClickListener {
+                                    updateData()
+                                }
+                                // btnDel 클릭 시 DB에 값 저장
+                                binding.btnDel.setOnClickListener {
+                                    deleteData()
+                                }
+                            }else{
+                                Toast.makeText(App.instance, "저장된 내용이 없음", Toast.LENGTH_SHORT).show()
+                                setVisModeOne()
+
+                                // btnSave 클릭 시 DB에 값 저장
+                                binding.btnSave.setOnClickListener{
+                                    saveData()
+                                }
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            // data 읽어오기에 실패했을 때
+                            Log.d(TAG, "Failed to read data")
+                        }
+                    })
+                }
+            }
+        }catch(e: NullPointerException){
+        }
+    }
+
+    /* DB - Data 쓰고 DB에 저장 */
+    private fun saveData() {
+        Log.d(TAG, "CalendarFragment - saveData() called")
+
+        val temp: String = binding.textDate.text.toString()
+        val date: String = temp.substring(0,4) + temp.substring(6,8) + temp.substring(10,12)
+        val memo: String = binding.edittext.text.toString()
+
+        val mDB = Firebase.database // main DB instance
+        val userDataset = User(date, memo)
+        var mRef : DatabaseReference
+
+
+        try{
+            UserApiClient.instance.me { user, error ->
+                if (error != null) {
+                    Log.e(TAG, "사용자 정보 요청 실패", error)
+
+                }else if (user != null){
+                    Log.i(TAG, "사용자 정보 요청 성공\n  회원번호: ${user.id}")
+
+                    mRef = mDB.getReference("Users/${user.id}/${date}")
+
+                    if(date.isNotEmpty() && memo.isNotEmpty()){
+                        /*
+                        mRef.setValue(userDataset).addOnCompleteListener {
+                            binding.textMemo.text = memo
+                            binding.edittext.text.clear()
+
+                            Toast.makeText(App.instance, "Successfully saved", Toast.LENGTH_SHORT).show()
+                            setVisModeTwo()
+
+                        }.addOnFailureListener {
+                            Toast.makeText(App.instance, "Failed", Toast.LENGTH_SHORT).show()
+                            Log.d(TAG, "저장 실패")
+                        }
+                         */
+                    } else if(memo.isNullOrEmpty()){
+                        Toast.makeText(App.instance, "내용을 입력해주세요", Toast.LENGTH_SHORT).show()
+                        Log.d(TAG, "Memo Empty. Request Denied.")
                     }
                 }
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                // data 읽어오기에 실패했을 때
-                Log.d(TAG, "Failed to read data")
-            }
-        })
-
+        }catch (e: NullPointerException){
+            Log.d(TAG, "NullPointerException", e)
+        }
     }
 
     /* DB - Data 수정하고 DB에 저장 */
@@ -178,39 +238,6 @@ class CalendarFragment : Fragment() {
         * 3. 취소 버튼 클릭 : nothing occurs. Log.d(canceled)
         * 4. Mode1 호출
         * */
-    }
-
-    /* DB - Data 쓰고 DB에 저장 */
-    private fun saveData() {
-        Log.d(TAG, "CalendarFragment - saveData() called")
-
-        val temp: String = binding.textDate.text.toString()
-        val date: String = temp.substring(0,4) + temp.substring(6,8) + temp.substring(10,12)
-        val memo: String = binding.edittext.text.toString()
-        var uID: String? = null
-
-        val user = User(date, memo)
-        val mRef = mDB.getReference("Users")
-
-        UserApiClient.instance.me { user, error ->
-            if (user != null) {
-                uID = user.id.toString()
-            }else{
-                Log.w(TAG, "error: Cannot Find UserID", error)
-            }
-        }
-
-        mRef.child(uID!!).child(date).setValue(user).addOnSuccessListener {
-            binding.textMemo.text = memo
-            binding.edittext.text.clear()
-
-            Toast.makeText(App.instance, "Successfully saved", Toast.LENGTH_SHORT).show()
-            setVisModeTwo()
-
-        }.addOnFailureListener {
-            Toast.makeText(App.instance, "Failed", Toast.LENGTH_SHORT).show()
-            Log.d(TAG, "저장 실패")
-        }
     }
 
     /* memo 입력 전 상태 */
