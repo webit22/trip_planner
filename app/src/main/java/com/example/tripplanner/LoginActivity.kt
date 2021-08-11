@@ -27,15 +27,19 @@ class LoginActivity : AppCompatActivity() {
 
     private val RC_SIGN_IN = 1000 // Google Login Result
     private var fbAuth : FirebaseAuth? = null // Firebase Auth
-    private var googleSigninClient : GoogleSignInClient? = null // Google Api Client
+    private var googleSignInClient : GoogleSignInClient? = null // Google Api Client
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        kakaoLoginStart()
-        googleLoginStart()
+        binding.btnGoogleLogin.setOnClickListener {
+            googleLoginStart()
+        }
+        binding.btnKakaoLogin.setOnClickListener {
+            kakaoLoginStart()
+        }
     }
 
     /* KAKAO LOGIN */
@@ -56,19 +60,16 @@ class LoginActivity : AppCompatActivity() {
         }
 
         // Login. 카카오톡이 설치되어 있으면 카카오톡으로 로그인, 아니면 카카오계정으로 로그인
-        binding.btnKakaoLogin.setOnClickListener {
-            if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
-                UserApiClient.instance.loginWithKakaoTalk(this, callback = callback)
-            } else {
-                UserApiClient.instance.loginWithKakaoAccount(this, callback = callback)
-            }
+        if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
+            UserApiClient.instance.loginWithKakaoTalk(this, callback = callback)
+        } else {
+            UserApiClient.instance.loginWithKakaoAccount(this, callback = callback)
         }
-
     }
 
 
     /* GOOGLE LOGIN */
-    fun googleLoginStart(){
+    private fun googleLoginStart(){
         Log.d(TAG, "LoginActivity - googleLoginStart() called")
 
         // BEGIN config_signin
@@ -80,13 +81,11 @@ class LoginActivity : AppCompatActivity() {
 
         fbAuth = FirebaseAuth.getInstance() // FB 인증을 사용할 수 있게 초기화
 
-        googleSigninClient = GoogleSignIn.getClient(this, gso)
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        //btn 클릭 시 구글 계정 인증 Activity가 보여짐
-        binding.btnGoogleLogin.setOnClickListener {
-            val signInIntent = googleSigninClient?.signInIntent
-            startActivityForResult(signInIntent, RC_SIGN_IN)
-        }
+        // 구글 계정 인증 Activity가 보여짐
+        val signInIntent = googleSignInClient?.signInIntent
+        startActivityForResult(signInIntent, RC_SIGN_IN)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
