@@ -16,25 +16,27 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.ktx.Firebase
 import com.kakao.auth.AuthType
 import com.kakao.auth.Session
+import com.kakao.auth.authorization.accesstoken.AccessToken
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.util.Utility
 import com.kakao.sdk.user.UserApiClient
 
-class LoginActivity : AppCompatActivity() {
+abstract class LoginActivity : AppCompatActivity() {
 
     private var _binding : ActivityLoginBinding? = null
     private val binding get() = _binding!!
     private val TAG: String = "로그"
+    // 로그인 공통 callback (login 결과를 SessionCallback.kt 으로 전송)
     private var callback : SessionCallback = SessionCallback(this)
 
     private val RC_SIGN_IN = 1000 // Google Login Result
     private var googleSignInClient : GoogleSignInClient? = null // Google Api Client
 
     private lateinit var fbAuth : FirebaseAuth // Firebase Auth
-    private var customToken: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,59 +82,34 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-
     /* KAKAO LOGIN */
     private fun kakaoLoginStart(){
         // keyHash 발급
         val keyHash = Utility.getKeyHash(this)
         Log.d(TAG, "KEY_HASH : $keyHash")
 
-        Session.getCurrentSession().addCallback(callback)
-        Session.getCurrentSession().open(AuthType.KAKAO_LOGIN_ALL, this)
-
-        // 로그인 공통 callback (login 결과에 대한 코드)
-        val callback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
-            Log.d(TAG, "LoginActivity - kakaoLoginStart() called")
-            if (error != null) {
-                Log.e(TAG, "로그인 실패", error)
-            }
-            else if (token != null) {
-                Log.i(TAG, "Toss accessToken to Firebase / AccessToken : ${token.accessToken}")
-                val kakaoToken = token.accessToken
-                fbAuthKakao(kakaoToken) // accesstoken, user 정보 같이 넘겨야하나?? 아니면 토큰만?
-
-                startMainActivity()
-            }
-        }
-
-        // Login. 카카오톡이 설치되어 있으면 카카오톡으로 로그인, 아니면 카카오계정으로 로그인
-        if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
-            UserApiClient.instance.loginWithKakaoTalk(this, callback = callback)
-        } else {
-            UserApiClient.instance.loginWithKakaoAccount(this, callback = callback)
-        }
+        // Session : login 상태를 유지시켜주는 객체 (accessToken을 관리함)
+        Session.getCurrentSession().addCallback(callback) // 세션 상태 변화 콜백을 받고자 할때 콜백을 등록
+        // authType - 인증받을 타입; callerActivity - 세션오픈을 호출한 activity
+        Session.getCurrentSession().open(AuthType.KAKAO_LOGIN_ALL, this) // 세션 오픈을 진행
     }
 
-    private fun fbAuthKakao(accessToken: String) {
+    // login 버튼 클릭 -> 세션 연결됨 -> 파이어베이스에 토큰 전달 및 사용자 인증 완료
+    fun fbAuthKakao(accessToken: AccessToken) {
 
-        // 1. firebase에 accessToken 전송
-        // 2. fbAuth에 user를 생성
-        // 3. fb custom token 발급받아서 최종 로그인 처리 (카카오 계정이 firebase에 등록됨)
+        // 사용자가 앱에 로그인하면 사용자의 로그인 인증 정보(예: 사용자 이름과 비밀번호)를 인증 서버로 전송하세요.
+        // 서버가 사용자 인증 정보를 확인하여 정보가 유효하면 커스텀 토큰을 반환합니다.
+        // 인증 서버에서 커스텀 토큰을 받은 후 다음과 같이 이 토큰을 signInWithCustomToken에 전달하여 사용자를 로그인 처리합니다.
+        // 1. import user로 카카오 정보 등록
+        // 2. customtoken 발급??
+        val customToken: String? = null
+        val user = fbAuth.currentUser
 
-        // Initiate sign in with custom token
         customToken?.let {
             fbAuth.signInWithCustomToken(it)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
-                        Log.d(TAG, "signInWithCustomToken:success")
-                        val user = fbAuth.currentUser
-
-                        // use FirebaseUser.getIdToken() value to authenticate with your backend server
-
-                        if (user != null) {
-                            Log.d(TAG, "로그인 성공")
-                        }
-                        startMainActivity()
+                        Log.d(TAG, "signInWithCustomToken : 로그인 성공")
 
                     } else {
                         Log.w(TAG, "로그인 실패", task.exception)
@@ -142,7 +119,10 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
         }
+        // user profile, name, email 정보 전송
+        startMainActivity()
     }
+
     /* GOOGLE LOGIN */
     private fun googleLoginStart(){
         Log.d(TAG, "LoginActivity - googleLoginStart() called")
@@ -163,35 +143,10 @@ class LoginActivity : AppCompatActivity() {
         startActivityForResult(signInIntent, RC_SIGN_IN)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-
-        Log.d(TAG, "LoginActivity - onActivityResult() called")
-
-        if(Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)){
-            Log.i(TAG, "Session get current session")
-            return
-        }
-        //https://jslee-tech.tistory.com/4
-
-        super.onActivityResult(requestCode, resultCode, data)
-        // Google Login Activity
-        if(requestCode === RC_SIGN_IN){
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-
-            try{
-                // 구글 로그인 성공; Firebase Auth 진행
-                val account = task.getResult(ApiException::class.java)
-                fbAuthGoogle(account)
-            }catch (e: ApiException){
-                Log.w(TAG, "Google sign in failed", e)
-            }
-        }
-    }
-
     // 정상적으로 로그인하면 GoogleSignInAccount 객체로부터 ID token을 가져와서 FB 사용자 인증 정보로 교환.
     // FB 사용자 인증 정보를 사용해 FB에 인증.
     private fun fbAuthGoogle(acct : GoogleSignInAccount){
-        Log.d(TAG, "LoginActivity - firebaseAuthWithGoogle() called")
+        Log.d(TAG, "LoginActivity - fbAuthGoogle() called")
 
         val credential = GoogleAuthProvider.getCredential(acct.idToken, null)
 
@@ -207,15 +162,52 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
-    private fun startMainActivity(){
+    // Login Result
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Log.d(TAG, "LoginActivity - onActivityResult() called")
+
+        // 카카오
+        /*
+        boolean handleActivityResult()
+        로그인 activity를 이용하여 sdk에서 필요로 하는 activity를 띄운다.
+        따라서 해당 activity의 결과를 로그인 activity가 받게 된다.
+        해당 결과를 세션이 받아서 다음 처리를 할 수 있도록 로그인 activity의 onActivityResult에서 해당 method를 호출한다.
+        returns true if the intent originated from Kakao login, false otherwise.
+        */
+
+        if(Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)){
+            Log.i(TAG, "Session get current session")
+            return
+        }
+        //https://jslee-tech.tistory.com/4
+
+        super.onActivityResult(requestCode, resultCode, data)
+        // 구글 로그인 결과
+        if(requestCode === RC_SIGN_IN){
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+
+            try{
+                // 구글 로그인 성공; Firebase Auth 진행
+                val account = task.getResult(ApiException::class.java)
+                fbAuthGoogle(account)
+            }catch (e: ApiException){
+                Log.w(TAG, "Google sign in failed", e)
+            }
+        }
+    }
+
+    private fun startMainActivity(profile: String, nickname: String, email: String){
         Log.d(TAG, "LoginActivity - startMainActivity() called")
 
         val intent = Intent(this, MainActivity::class.java)
+        intent.putExtra("profile", profile)
+        intent.putExtra("nickname", nickname)
+        intent.putExtra("email", email)
         startActivity(intent)
+        finish()
     }
-
     override fun onDestroy() {
         super.onDestroy()
-        Session.getCurrentSession().removeCallback(callback)
+        Session.getCurrentSession().removeCallback(callback) // 더이상 세션 상태 변화 콜백을 받고 싶지 않을 때 삭제
     }
 }

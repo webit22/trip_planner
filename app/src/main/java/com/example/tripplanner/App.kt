@@ -25,7 +25,7 @@ class App : Application() {
     }
     fun getAppContext() : App{
         checkNotNull(instance){
-            "This Application does not inherit com.kakao.App"
+            "This Application does not inherit com.example.App"
         }
         return instance!!
     }

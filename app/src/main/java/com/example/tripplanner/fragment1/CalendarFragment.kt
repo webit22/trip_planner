@@ -76,6 +76,18 @@ class CalendarFragment : Fragment() {
             /* CalendarView + Memo */
             setCalendarView()
 
+            // btnSave 클릭 시 DB에 값 저장
+            binding.btnSave.setOnClickListener{
+                saveData()
+            }
+            // btnUpdate 클릭 시 DB에 값 수정
+            binding.btnUpdate.setOnClickListener {
+                updateData()
+            }
+            // btnDel 클릭 시 DB에 값 저장
+            binding.btnDel.setOnClickListener {
+                deleteData()
+            }
         } catch (e: NullPointerException) {
             Log.w(TAG, "onViewCreated()", e)
         }
@@ -143,22 +155,9 @@ class CalendarFragment : Fragment() {
                                 binding.textMemo.text = memo.toString() // set data to TextView
                                 setVisModeTwo()
 
-                                // btnUpdate 클릭 시 DB에 값 수정
-                                binding.btnUpdate.setOnClickListener {
-                                    updateData()
-                                }
-                                // btnDel 클릭 시 DB에 값 저장
-                                binding.btnDel.setOnClickListener {
-                                    deleteData()
-                                }
                             }else{
                                 Toast.makeText(App.instance, "저장된 내용이 없음", Toast.LENGTH_SHORT).show()
                                 setVisModeOne()
-
-                                // btnSave 클릭 시 DB에 값 저장
-                                binding.btnSave.setOnClickListener{
-                                    saveData()
-                                }
                             }
                         }
 
@@ -173,6 +172,8 @@ class CalendarFragment : Fragment() {
         }
     }
 
+    // 트랜잭션을 사용해서 데이터 저장하는 방법
+// https://firebase.google.com/docs/database/android/read-and-write?authuser=0#kotlin+ktx_2
     /* DB - Data 쓰고 DB에 저장 */
     private fun saveData() {
         Log.d(TAG, "CalendarFragment - saveData() called")
