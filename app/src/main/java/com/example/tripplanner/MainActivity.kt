@@ -74,6 +74,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 uEmail.text = user.kakaoAccount?.email
                 Glide.with(uProfile).load(user.kakaoAccount?.profile?.thumbnailImageUrl).circleCrop().into(uProfile)
 
+if (currentUser.getPhotoUrl() != null) { // currentUser = FirebaseUser library를 import해야함
+                Glide.with(this)
+                        .load(currentUser.getPhotoUrl())
+                        .into(imageView);
+            }
+
+
             }else{ // 로그인 실패
                 uName.text = null
                 uProfile.setImageBitmap(null)

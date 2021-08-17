@@ -1,7 +1,8 @@
 package com.example.tripplanner
 
 import android.util.Log
-import com.android.volley.ClientError
+import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
 import com.kakao.auth.ISessionCallback
 import com.kakao.auth.Session
 import com.kakao.network.ErrorResult
@@ -15,22 +16,37 @@ class SessionCallback(val context : LoginActivity): ISessionCallback {
     private val TAG : String = "로그/SessionCallback"
 
     override fun onSessionOpened() {
+        Toast.makeText(App.instance, "Successfully logged in to Kakao. Now creating or updating a Firebase User.", Toast.LENGTH_LONG).show()
+
         UserManagement.getInstance().me(object : MeV2ResponseCallback(){
             override fun onSuccess(result: MeV2Response?) {
                 if(result != null){
-                    Log.d("TAG", "세션 오픈")
+                    Log.d(TAG, "세션 오픈")
 
-                    val userProfile = result.profileImagePath
-                    val userName = result.nickname
-                    val userEmail = result.kakaoAccount.email
-                    val token = Session.getCurrentSession().tokenInfo
+                    /* return Task object that will call validation server and retrieve firebase token */
+                    val accessToken = Session.getCurrentSession().tokenInfo.accessToken
 
-                    Log.i(TAG, "ID : ${result.id}")
-                    Log.i(TAG, "Email : $userEmail")
-                    Log.i(TAG, "AccessToken : $token")
+                    context.getFirebaseJwt(accessToken)?.continueWithTask { task ->
+                        val firebaseToken = task.result
+                        val auth = FirebaseAuth.getInstance()
+                        auth.signInWithCustomToken(firebaseToken!!)
+                    }?.addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Log.d(TAG, "Successfully created a Firebase user")
+                            val userProfile = result.profileImagePath
+                            val userName = result.nickname
+                            val userEmail = result.kakaoAccount.email
 
-                    context.fbAuthKakao(token)
-                    //context.startMainActivity(userProfile, userName, userEmail)
+                            context.startMainActivity(userProfile, userName, userEmail)
+
+                        } else {
+                            Toast.makeText(App.instance,"Failed to create a Firebase user.", Toast.LENGTH_LONG).show()
+                            if (task.exception != null) {
+                                Log.e(TAG, task.exception.toString())
+                            }
+                            context.updateUI()
+                        }
+                    }
                 }
             }
 

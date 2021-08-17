@@ -36,11 +36,13 @@ class ProfileViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         nameTextView.text = profile.name
 
         //imageview와 실제 imageview를 묶는다.
-        Glide
-            .with(App.instance) // 자기 자신의 context 가져옴
-            .load(profile.pfimage)
-            .placeholder(R.drawable.profile)
-            .into(pfImageView)
+        App.instance?.let {
+            Glide
+                .with(it) // 자기 자신의 context 가져옴
+                .load(profile.pfimage)
+                .placeholder(R.drawable.profile)
+                .into(pfImageView)
+        }
     }
 
 

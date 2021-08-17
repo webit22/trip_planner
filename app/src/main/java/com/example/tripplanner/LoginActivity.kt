@@ -1,29 +1,34 @@
 package com.example.tripplanner
 
+import android.R
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.example.tripplanner.databinding.ActivityLoginBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.ktx.Firebase
 import com.kakao.auth.AuthType
 import com.kakao.auth.Session
-import com.kakao.auth.authorization.accesstoken.AccessToken
-import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.util.Utility
-import com.kakao.sdk.user.UserApiClient
+import org.json.JSONObject
+
 
 abstract class LoginActivity : AppCompatActivity() {
 
@@ -54,21 +59,23 @@ abstract class LoginActivity : AppCompatActivity() {
         binding.btnKakaoLogin.setOnClickListener {
             kakaoLoginStart()
         }
-        binding.btnStart.setOnClickListener {
-            startMainActivity()
-        }
+//        binding.btnStart.setOnClickListener {
+//            val fbUser = Firebase.auth.currentUser
+//            val name = resources.getResourceName()
+//
+//            startMainActivity()
+//        }
     }
 
     // [on_start_check_user]
     public override fun onStart() {
         super.onStart()
-        // Check if user is signed in (non-null) and update UI accordingly.
-        val currentUser = fbAuth.currentUser
-        updateUI(currentUser)
+        updateUI()
     }
 
     // Update UI based on Firebase's current user. Show Login Button if not logged in.
-    private fun updateUI(user: FirebaseUser?) {
+    fun updateUI() {
+        val user = fbAuth.currentUser
         if(user != null) { // User is signed in
             // UI ver.1 - 시작하기 버튼 하나만 구성. loginbtn 2개 invisible
             binding.btnStart.visibility = View.VISIBLE
@@ -82,6 +89,7 @@ abstract class LoginActivity : AppCompatActivity() {
         }
     }
 
+
     /* KAKAO LOGIN */
     private fun kakaoLoginStart(){
         // keyHash 발급
@@ -94,34 +102,37 @@ abstract class LoginActivity : AppCompatActivity() {
         Session.getCurrentSession().open(AuthType.KAKAO_LOGIN_ALL, this) // 세션 오픈을 진행
     }
 
-    // login 버튼 클릭 -> 세션 연결됨 -> 파이어베이스에 토큰 전달 및 사용자 인증 완료
-    fun fbAuthKakao(accessToken: AccessToken) {
+    open fun getFirebaseJwt(kakaoAccessToken: String): Task<String>? {
+        val source = TaskCompletionSource<String>()
+        val queue = Volley.newRequestQueue(this)
+        val url = resources.getString(R.string.validation_server_domain) + "/callbacks/kakao/verifyToken"
+        val validationObject: HashMap<String?, String?> = HashMap()
+        validationObject["token"] = kakaoAccessToken
 
-        // 사용자가 앱에 로그인하면 사용자의 로그인 인증 정보(예: 사용자 이름과 비밀번호)를 인증 서버로 전송하세요.
-        // 서버가 사용자 인증 정보를 확인하여 정보가 유효하면 커스텀 토큰을 반환합니다.
-        // 인증 서버에서 커스텀 토큰을 받은 후 다음과 같이 이 토큰을 signInWithCustomToken에 전달하여 사용자를 로그인 처리합니다.
-        // 1. import user로 카카오 정보 등록
-        // 2. customtoken 발급??
-        val customToken: String? = null
-        val user = fbAuth.currentUser
-
-        customToken?.let {
-            fbAuth.signInWithCustomToken(it)
-                .addOnCompleteListener(this) { task ->
-                    if (task.isSuccessful) {
-                        Log.d(TAG, "signInWithCustomToken : 로그인 성공")
-
-                    } else {
-                        Log.w(TAG, "로그인 실패", task.exception)
-                        Toast.makeText(App.instance, "로그인 실패", Toast.LENGTH_SHORT).show()
-
-                        updateUI(null)
-                    }
+        val request: JsonObjectRequest = object : JsonObjectRequest(Method.POST, url,
+            JSONObject(validationObject as Map<*, *>),
+            Response.Listener { response ->
+                try {
+                    val firebaseToken = response.getString("firebase_token")
+                    source.setResult(firebaseToken)
+                } catch (e: Exception) {
+                    source.setException(e)
                 }
+            },
+            Response.ErrorListener { error ->
+                Log.e(TAG, error.toString())
+                source.setException(error)
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params: MutableMap<String, String> = HashMap() // Access token retrieved after successful Kakao Login
+                params["token"] = kakaoAccessToken
+                return params
+            }
         }
-        // user profile, name, email 정보 전송
-        startMainActivity()
+        queue.add(request)
+        return source.task // call validation server and retrieve firebase token
     }
+
 
     /* GOOGLE LOGIN */
     private fun googleLoginStart(){
@@ -154,7 +165,7 @@ abstract class LoginActivity : AppCompatActivity() {
             .addOnCompleteListener(this){
                 if(it.isSuccessful){
                     Log.d(TAG, "로그인 성공 : ${acct.id}")
-                    startMainActivity()
+                    // startMainActivity()
                 }else{
                     Toast.makeText(this, "로그인 실패", Toast.LENGTH_SHORT).show()
                     Log.w(TAG, "로그인 실패", it.exception)
@@ -189,14 +200,15 @@ abstract class LoginActivity : AppCompatActivity() {
             try{
                 // 구글 로그인 성공; Firebase Auth 진행
                 val account = task.getResult(ApiException::class.java)
-                fbAuthGoogle(account)
+                fbAuthGoogle(account!!)
             }catch (e: ApiException){
                 Log.w(TAG, "Google sign in failed", e)
             }
         }
     }
 
-    private fun startMainActivity(profile: String, nickname: String, email: String){
+
+    fun startMainActivity(profile: String, nickname: String, email: String){
         Log.d(TAG, "LoginActivity - startMainActivity() called")
 
         val intent = Intent(this, MainActivity::class.java)
