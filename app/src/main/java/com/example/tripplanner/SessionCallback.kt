@@ -26,18 +26,17 @@ class SessionCallback(val context : LoginActivity): ISessionCallback {
                     /* return Task object that will call validation server and retrieve firebase token */
                     val accessToken = Session.getCurrentSession().tokenInfo.accessToken
 
-                    context.getFirebaseJwt(accessToken)?.continueWithTask { task ->
+                    context.getFirebaseJwt(accessToken).continueWithTask { task ->
                         val firebaseToken = task.result
                         val auth = FirebaseAuth.getInstance()
                         auth.signInWithCustomToken(firebaseToken!!)
-                    }?.addOnCompleteListener { task ->
+                    }.addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             Log.d(TAG, "Successfully created a Firebase user")
-                            val userProfile = result.profileImagePath
                             val userName = result.nickname
                             val userEmail = result.kakaoAccount.email
 
-                            context.startMainActivity(userProfile, userName, userEmail)
+                            context.startMainActivity(userName, userEmail)
 
                         } else {
                             Toast.makeText(App.instance,"Failed to create a Firebase user.", Toast.LENGTH_LONG).show()

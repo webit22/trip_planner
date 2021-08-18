@@ -11,16 +11,14 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.GravityCompat
 import com.bumptech.glide.Glide
-import com.example.tripplanner.R.id.btn_navi
-import com.example.tripplanner.R.id.text_addr
 import com.example.tripplanner.adapters.ViewPagerAdapter
 import com.example.tripplanner.databinding.ActivityMainBinding
 import com.example.tripplanner.fragments.ZoomOutPageTransformer
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
-import com.kakao.sdk.auth.model.OAuthToken
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.kakao.sdk.user.UserApiClient
-import org.w3c.dom.Text
 import com.example.tripplanner.R.id.activity_main_layout_toolbar as activity_main_layout_toolbar
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -41,57 +39,43 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         mBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        Log.d(TAG, "MainActivity - onCreate() called")
+
         val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(activity_main_layout_toolbar)
         setSupportActionBar(toolbar) //상단 toolbar를 app bar로 지정해주기
         supportActionBar?.setDisplayHomeAsUpEnabled(true) // btnNavi 활성화
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_baseline_menu_24) // 홈버튼 이미지 변경
 
         setUpPages()
-        // setProfile() // 사용자가 로그인 되어있는지 확인 + 프로필 설정
 
-        Log.d(TAG, "MainActivity - onCreate() called")
+        val intent = intent
+        setProfile(intent)
 
         onClickBtnNavi()
         onClickLocation()
 
     }
 
-    /* Login 후에 profile, nickname이 네비에 보이게 */
-/* 참고 : https://blog.naver.com/woo171tm/221461720960
-    private fun setProfile(){
+    private fun setProfile(intent: Intent) {
         val uProfile = findViewById<ImageView>(R.id.profilepic)
-        val uName = findViewById<TextView>(R.id.text_username)
+        val uName = findViewById<TextView>(R.id.text_userName)
         val uEmail = findViewById<TextView>(R.id.text_userEmail)
 
-        UserApiClient.instance.me { user, error ->
-            if(user != null){ // login succeeded
-                Log.i(TAG, "MainActivity - invoke : id = ${user.id}")
-                Log.i(TAG, "MainActivity - invoke : email = ${user.kakaoAccount?.email}")
-                Log.i(TAG, "MainActivity - invoke : nickname = ${user.kakaoAccount?.profile?.nickname}")
+        val fbUser = Firebase.auth.currentUser
+        val strNickname = intent.getStringExtra("nickname")
+        val strEmail = intent.getStringExtra("email")
 
-                // Navi bar profile setting
-                uName.text = user.kakaoAccount?.profile?.nickname
-                uEmail.text = user.kakaoAccount?.email
-                Glide.with(uProfile).load(user.kakaoAccount?.profile?.thumbnailImageUrl).circleCrop().into(uProfile)
-
-if (currentUser.getPhotoUrl() != null) { // currentUser = FirebaseUser library를 import해야함
+        if (fbUser != null) {
+            if (fbUser.photoUrl != null) {
                 Glide.with(this)
-                        .load(currentUser.getPhotoUrl())
-                        .into(imageView);
+                    .load(fbUser.photoUrl)
+                    .into(uProfile);
             }
-
-
-            }else{ // 로그인 실패
-                uName.text = null
-                uProfile.setImageBitmap(null)
-                // 로그인 화면 넘어가지 않도록?
-            }
-            //if(throw != null){
-            //    Log.w(TAG, "invoke: ${throw.getLocalizedMessage}")
-            //}
         }
+        uName.text = strNickname
+        uEmail.text = strEmail
     }
-*/
+
 
     /* 상단 메뉴 버튼 클릭 시 Navigation tab 열림 */
     private fun onClickBtnNavi(){

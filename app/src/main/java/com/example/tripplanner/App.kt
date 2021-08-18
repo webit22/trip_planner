@@ -1,6 +1,7 @@
 package com.example.tripplanner
 
 import android.app.Application
+import com.kakao.auth.KakaoSDK
 import com.kakao.sdk.common.KakaoSdk
 
 // 전역으로 사용 가능한 context (GlobalApplication)
@@ -15,8 +16,12 @@ class App : Application() {
         super.onCreate()
         // 카카오 SDK 초기화
         // KakaoSdk.init(this, getString(R.string.kakao_app_key))
-        KakaoSdk.init(this, KakaoSdkAdapter().toString())
         instance = this
+        if(KakaoSDK.getAdapter() == null){
+            KakaoSDK.init(KakaoSDKAdapter(getAppContext()))
+        }
+
+
     }
 
     override fun onTerminate() {

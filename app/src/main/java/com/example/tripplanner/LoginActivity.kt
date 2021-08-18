@@ -1,13 +1,12 @@
 package com.example.tripplanner
 
-import android.R
 import android.content.Intent
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
@@ -20,7 +19,6 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -29,14 +27,14 @@ import com.kakao.auth.Session
 import com.kakao.sdk.common.util.Utility
 import org.json.JSONObject
 
-
-abstract class LoginActivity : AppCompatActivity() {
+// loginActivity - class 앞에 abstract 제거 (make activity class as public)
+open class LoginActivity : AppCompatActivity() {
 
     private var _binding : ActivityLoginBinding? = null
     private val binding get() = _binding!!
     private val TAG: String = "로그"
     // 로그인 공통 callback (login 결과를 SessionCallback.kt 으로 전송)
-    private var callback : SessionCallback = SessionCallback(this)
+    private lateinit var callback : SessionCallback
 
     private val RC_SIGN_IN = 1000 // Google Login Result
     private var googleSignInClient : GoogleSignInClient? = null // Google Api Client
@@ -48,10 +46,10 @@ abstract class LoginActivity : AppCompatActivity() {
         _binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // [START initialize_auth]
-        // Initialize Firebase Auth
-        fbAuth = Firebase.auth
-        // [END initialize_auth]
+        Log.d(TAG, "LoginActivity - onCreate() called")
+
+        fbAuth = Firebase.auth // Initialize Firebase Auth
+        callback = SessionCallback(this) // Initialize Session
 
         binding.btnGoogleLogin.setOnClickListener {
             googleLoginStart()
@@ -59,28 +57,30 @@ abstract class LoginActivity : AppCompatActivity() {
         binding.btnKakaoLogin.setOnClickListener {
             kakaoLoginStart()
         }
-//        binding.btnStart.setOnClickListener {
-//            val fbUser = Firebase.auth.currentUser
-//            val name = resources.getResourceName()
-//
-//            startMainActivity()
-//        }
+        binding.btnStart.setOnClickListener {
+            val fbUser = fbAuth.currentUser
+            val name = fbUser?.displayName.toString()
+            val email = fbUser?.email.toString()
+
+            startMainActivity(name, email)
+        }
     }
 
-    // [on_start_check_user]
     public override fun onStart() {
         super.onStart()
+        Log.d(TAG, "LoginActivity - onStart() called")
         updateUI()
     }
 
     // Update UI based on Firebase's current user. Show Login Button if not logged in.
     fun updateUI() {
+        Log.d(TAG, "LoginActivity - updateUI() called")
         val user = fbAuth.currentUser
         if(user != null) { // User is signed in
             // UI ver.1 - 시작하기 버튼 하나만 구성. loginbtn 2개 invisible
             binding.btnStart.visibility = View.VISIBLE
             binding.btnGoogleLogin.visibility = View.GONE
-            binding.btnKakaoLogin.visibility = View.GONE
+            binding.btnKakaoLogin.visibility = View.VISIBLE
         } else{
             // UI ver.2 - loginbtn 2개로 구성. 시작하기 버튼 invisible
             binding.btnStart.visibility = View.GONE
@@ -92,6 +92,7 @@ abstract class LoginActivity : AppCompatActivity() {
 
     /* KAKAO LOGIN */
     private fun kakaoLoginStart(){
+        Log.d(TAG, "LoginActivity - kakaoLoginStart() called")
         // keyHash 발급
         val keyHash = Utility.getKeyHash(this)
         Log.d(TAG, "KEY_HASH : $keyHash")
@@ -102,13 +103,15 @@ abstract class LoginActivity : AppCompatActivity() {
         Session.getCurrentSession().open(AuthType.KAKAO_LOGIN_ALL, this) // 세션 오픈을 진행
     }
 
-    open fun getFirebaseJwt(kakaoAccessToken: String): Task<String>? {
+    open fun getFirebaseJwt(kakaoAccessToken: String): Task<String> {
+        Log.d(TAG, "LoginActivity - getFirebaseJwt() called")
         val source = TaskCompletionSource<String>()
         val queue = Volley.newRequestQueue(this)
-        val url = resources.getString(R.string.validation_server_domain) + "/callbacks/kakao/verifyToken"
+        val url = "https://kapi.kakao.com/v2/user/me?secure_resource=true/verifyToken" // resources.getString(R.string.validation_server_domain) +
         val validationObject: HashMap<String?, String?> = HashMap()
         validationObject["token"] = kakaoAccessToken
 
+        // listener가 response를 못받아오나?
         val request: JsonObjectRequest = object : JsonObjectRequest(Method.POST, url,
             JSONObject(validationObject as Map<*, *>),
             Response.Listener { response ->
@@ -125,7 +128,10 @@ abstract class LoginActivity : AppCompatActivity() {
             }) {
             override fun getParams(): Map<String, String> {
                 val params: MutableMap<String, String> = HashMap() // Access token retrieved after successful Kakao Login
-                params["token"] = kakaoAccessToken
+                //params["token"] = kakaoAccessToken
+                params["Authorization"] = String.format("Basic %s", Base64.encodeToString(
+                    String.format("%s:%s", "token", kakaoAccessToken).toByteArray(), Base64.DEFAULT)
+                )
                 return params
             }
         }
@@ -140,7 +146,7 @@ abstract class LoginActivity : AppCompatActivity() {
 
         // BEGIN config_signin
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestIdToken("347398038418-2fqi70aa6dc1vea3rd91c99ea41cnkr0.apps.googleusercontent.com") // getString(R.string.default_web_client_id)
             .requestEmail()
             .build()
         // END
@@ -190,7 +196,6 @@ abstract class LoginActivity : AppCompatActivity() {
             Log.i(TAG, "Session get current session")
             return
         }
-        //https://jslee-tech.tistory.com/4
 
         super.onActivityResult(requestCode, resultCode, data)
         // 구글 로그인 결과
@@ -208,18 +213,19 @@ abstract class LoginActivity : AppCompatActivity() {
     }
 
 
-    fun startMainActivity(profile: String, nickname: String, email: String){
+    fun startMainActivity(nickname: String, email: String){
         Log.d(TAG, "LoginActivity - startMainActivity() called")
 
         val intent = Intent(this, MainActivity::class.java)
-        intent.putExtra("profile", profile)
         intent.putExtra("nickname", nickname)
         intent.putExtra("email", email)
         startActivity(intent)
         finish()
     }
+
+    // 네이버, 구글 등의 다른 로그인 API를 같이 사용하는 경우, 이 콜백  제거를 안 해주면 로그아웃 작업에서 문제 생김
     override fun onDestroy() {
         super.onDestroy()
-        Session.getCurrentSession().removeCallback(callback) // 더이상 세션 상태 변화 콜백을 받고 싶지 않을 때 삭제
+        Session.getCurrentSession().removeCallback(callback) //현재 액티비티 제거 시 콜백도 같이 제거
     }
 }

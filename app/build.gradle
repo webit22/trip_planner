@@ -71,7 +71,7 @@ dependencies {
     implementation "com.kakao.sdk:v2-talk:2.5.2" // 친구, 메시지(카카오톡)
     implementation "com.kakao.sdk:v2-link:2.5.2" // 메시지(카카오링크)
     implementation "com.kakao.sdk:v2-navi:2.5.2" // 카카오내비
-    implementation group: 'com.kakao.sdk', name: 'usermgmt', version: '1.14.0'
+    implementation group: 'com.kakao.sdk', name: 'usermgmt', version: '1.27.0'
 
     // Import the BoM for the Firebase platform
     implementation platform('com.google.firebase:firebase-bom:28.2.1')

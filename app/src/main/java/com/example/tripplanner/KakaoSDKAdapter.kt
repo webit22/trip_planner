@@ -1,16 +1,15 @@
 package com.example.tripplanner
 
-import com.kakao.sdk.common.json.KakaoDateTypeAdapter
 import com.kakao.auth.*
 
-class KakaoSdkAdapter : KakaoAdapter(){
+class KakaoSDKAdapter(context: App) : KakaoAdapter(){
     override fun getApplicationConfig(): IApplicationConfig {
         return IApplicationConfig {
             App.instance?.getAppContext()
         }
     }
 
-    override fun getSessionConfig() : ISessionConfig{
+    override fun getSessionConfig() : ISessionConfig {
         return object : ISessionConfig{
             override fun getAuthTypes(): Array<AuthType> {
                 return arrayOf(AuthType.KAKAO_LOGIN_ALL) // 모든 로그인 방식 제공
