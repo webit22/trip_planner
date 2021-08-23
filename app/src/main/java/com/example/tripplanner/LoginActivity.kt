@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
@@ -107,12 +108,13 @@ open class LoginActivity : AppCompatActivity() {
         Log.d(TAG, "LoginActivity - getFirebaseJwt() called")
         val source = TaskCompletionSource<String>()
         val queue = Volley.newRequestQueue(this)
-        val url = "https://kapi.kakao.com/v2/user/me?secure_resource=true/verifyToken" // resources.getString(R.string.validation_server_domain) +
+        val url = "http://192.168.35.186:8000/verifyToken" // resources.getString(R.string.validation_server_domain)
         val validationObject: HashMap<String?, String?> = HashMap()
         validationObject["token"] = kakaoAccessToken
 
         // listener가 response를 못받아오나?
-        val request: JsonObjectRequest = object : JsonObjectRequest(Method.POST, url,
+        val request: JsonObjectRequest = object : JsonObjectRequest(
+            Request.Method.POST, url,
             JSONObject(validationObject as Map<*, *>),
             Response.Listener { response ->
                 try {

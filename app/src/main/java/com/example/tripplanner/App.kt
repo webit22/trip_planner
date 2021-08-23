@@ -20,8 +20,6 @@ class App : Application() {
         if(KakaoSDK.getAdapter() == null){
             KakaoSDK.init(KakaoSDKAdapter(getAppContext()))
         }
-
-
     }
 
     override fun onTerminate() {
