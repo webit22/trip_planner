@@ -2,7 +2,6 @@ package com.example.tripplanner
 
 import android.app.Application
 import com.kakao.auth.KakaoSDK
-import com.kakao.sdk.common.KakaoSdk
 
 // 전역으로 사용 가능한 context (GlobalApplication)
 class App : Application() {

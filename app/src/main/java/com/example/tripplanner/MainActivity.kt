@@ -1,10 +1,12 @@
 package com.example.tripplanner
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -19,6 +21,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.kakao.sdk.user.UserApiClient
+import java.lang.NullPointerException
 import com.example.tripplanner.R.id.activity_main_layout_toolbar as activity_main_layout_toolbar
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -48,32 +51,32 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         setUpPages()
 
-        val intent = intent
-        setProfile(intent)
+        setProfile()
 
         onClickBtnNavi()
         onClickLocation()
 
     }
 
-    private fun setProfile(intent: Intent) {
-        val uProfile = findViewById<ImageView>(R.id.profilepic)
-        val uName = findViewById<TextView>(R.id.text_userName)
-        val uEmail = findViewById<TextView>(R.id.text_userEmail)
+    @SuppressLint("ResourceType")
+    private fun setProfile() {
+        try{
+            val user = Firebase.auth.currentUser
+            user?.let {
+                val header : View = binding.naviView.getHeaderView(0)
+                val uName = header.findViewById<TextView>(R.id.text_userName)
+                val uEmail = header.findViewById<TextView>(R.id.text_userEmail)
+                val uPhoto = header.findViewById<ImageView>(R.id.profilepic)
 
-        val fbUser = Firebase.auth.currentUser
-        val strNickname = intent.getStringExtra("nickname")
-        val strEmail = intent.getStringExtra("email")
-
-        if (fbUser != null) {
-            if (fbUser.photoUrl != null) {
-                Glide.with(this)
-                    .load(fbUser.photoUrl)
-                    .into(uProfile);
+                uName.text = user.displayName
+                uEmail.text = user.email
+                uPhoto.setImageURI(user.photoUrl)
             }
         }
-        uName.text = strNickname
-        uEmail.text = strEmail
+        catch(e: NullPointerException){
+            Log.d(TAG, "NullPointerException", e)
+            Toast.makeText(App.instance, "NullPointerException: $e", Toast.LENGTH_LONG).show()
+        }
     }
 
 

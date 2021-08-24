@@ -33,12 +33,9 @@ class SessionCallback(val context : LoginActivity): ISessionCallback {
                     }.addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             Log.d(TAG, "Successfully created a Firebase user")
-                            val userName = result.nickname
-                            val userEmail = result.kakaoAccount.email
-
-                            context.startMainActivity(userName, userEmail)
-
-                        } else {
+                            context.startMainActivity()
+                        }
+                        else {
                             Toast.makeText(App.instance,"Failed to create a Firebase user.", Toast.LENGTH_LONG).show()
                             if (task.exception != null) {
                                 Log.e(TAG, task.exception.toString())

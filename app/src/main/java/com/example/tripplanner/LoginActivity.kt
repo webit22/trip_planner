@@ -59,11 +59,7 @@ open class LoginActivity : AppCompatActivity() {
             kakaoLoginStart()
         }
         binding.btnStart.setOnClickListener {
-            val fbUser = fbAuth.currentUser
-            val name = fbUser?.displayName.toString()
-            val email = fbUser?.email.toString()
-
-            startMainActivity(name, email)
+            startMainActivity()
         }
     }
 
@@ -112,7 +108,6 @@ open class LoginActivity : AppCompatActivity() {
         val validationObject: HashMap<String?, String?> = HashMap()
         validationObject["token"] = kakaoAccessToken
 
-        // listener가 response를 못받아오나?
         val request: JsonObjectRequest = object : JsonObjectRequest(
             Request.Method.POST, url,
             JSONObject(validationObject as Map<*, *>),
@@ -173,7 +168,7 @@ open class LoginActivity : AppCompatActivity() {
             .addOnCompleteListener(this){
                 if(it.isSuccessful){
                     Log.d(TAG, "로그인 성공 : ${acct.id}")
-                    // startMainActivity()
+                    startMainActivity()
                 }else{
                     Toast.makeText(this, "로그인 실패", Toast.LENGTH_SHORT).show()
                     Log.w(TAG, "로그인 실패", it.exception)
@@ -215,12 +210,10 @@ open class LoginActivity : AppCompatActivity() {
     }
 
 
-    fun startMainActivity(nickname: String, email: String){
+    fun startMainActivity(){
         Log.d(TAG, "LoginActivity - startMainActivity() called")
 
         val intent = Intent(this, MainActivity::class.java)
-        intent.putExtra("nickname", nickname)
-        intent.putExtra("email", email)
         startActivity(intent)
         finish()
     }
