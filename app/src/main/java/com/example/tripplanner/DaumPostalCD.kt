@@ -55,11 +55,11 @@ class DaumPostalCD : AppCompatActivity(){
         fun setAddress(arg1: String, arg2: String, arg3: String){
             // 파라미터 : data.zonecode, data.roadAddress, data.buildingName
             // handler를 통해 javascript 이벤트 반응
-            val extra : Bundle? = null
-            var intent : Intent? = null
+//            val extra : Bundle? = null
+//            var intent : Intent? = null
 
-            val result = "($arg1);$arg2;$arg3"
-            Log.e(TAG, "DaumPostalCD - setAddress.result = $result")
+//            val result = "($arg1);$arg2;$arg3"
+//            Log.e(TAG, "DaumPostalCD - setAddress.result = $result")
 //            handler.post {
 //                extra?.putString("data", result)
 //                if (extra != null) intent?.putExtras(extra)
