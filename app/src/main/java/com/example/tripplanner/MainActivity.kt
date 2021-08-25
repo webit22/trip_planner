@@ -2,6 +2,7 @@ package com.example.tripplanner
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.icu.number.NumberFormatter.with
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -13,6 +14,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.GravityCompat
 import com.bumptech.glide.Glide
+import com.bumptech.glide.Glide.with
 import com.example.tripplanner.adapters.ViewPagerAdapter
 import com.example.tripplanner.databinding.ActivityMainBinding
 import com.example.tripplanner.fragments.ZoomOutPageTransformer
@@ -70,7 +72,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                 uName.text = user.displayName
                 uEmail.text = user.email
-                uPhoto.setImageURI(user.photoUrl)
+                GlideApp.with(App.instance!!)
+                    .load(user.photoUrl)
+                    .into(uPhoto)
             }
         }
         catch(e: NullPointerException){
