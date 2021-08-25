@@ -25,7 +25,10 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.kakao.auth.AuthType
 import com.kakao.auth.Session
+import com.kakao.sdk.auth.AuthApiClient
+import com.kakao.sdk.common.model.KakaoSdkError
 import com.kakao.sdk.common.util.Utility
+import com.kakao.sdk.user.UserApiClient
 import org.json.JSONObject
 
 // loginActivity - class 앞에 abstract 제거 (make activity class as public)
@@ -76,11 +79,11 @@ open class LoginActivity : AppCompatActivity() {
         if(user != null) { // User is signed in
             // UI ver.1 - 시작하기 버튼 하나만 구성. loginbtn 2개 invisible
             binding.btnStart.visibility = View.VISIBLE
-            binding.btnGoogleLogin.visibility = View.GONE
+            binding.btnGoogleLogin.visibility = View.VISIBLE
             binding.btnKakaoLogin.visibility = View.VISIBLE
         } else{
             // UI ver.2 - loginbtn 2개로 구성. 시작하기 버튼 invisible
-            binding.btnStart.visibility = View.GONE
+            binding.btnStart.visibility = View.VISIBLE
             binding.btnGoogleLogin.visibility = View.VISIBLE
             binding.btnKakaoLogin.visibility = View.VISIBLE
         }
@@ -94,10 +97,31 @@ open class LoginActivity : AppCompatActivity() {
         val keyHash = Utility.getKeyHash(this)
         Log.d(TAG, "KEY_HASH : $keyHash")
 
-        // Session : login 상태를 유지시켜주는 객체 (accessToken을 관리함)
-        Session.getCurrentSession().addCallback(callback) // 세션 상태 변화 콜백을 받고자 할때 콜백을 등록
-        // authType - 인증받을 타입; callerActivity - 세션오픈을 호출한 activity
-        Session.getCurrentSession().open(AuthType.KAKAO_LOGIN_ALL, this) // 세션 오픈을 진행
+        val accessToken = Session.getCurrentSession().tokenInfo.accessToken
+        if (AuthApiClient.instance.hasToken()) {
+            UserApiClient.instance.accessTokenInfo { _, error ->
+                if (error != null) {
+                    if (error is KakaoSdkError && error.isInvalidTokenError()) {
+                        // Kakao Login
+                        Session.getCurrentSession().addCallback(callback)
+                        Session.getCurrentSession().open(AuthType.KAKAO_LOGIN_ALL, this) // 세션 오픈을 진행
+                    }
+                    else {
+                        //기타 에러
+                        Log.w(TAG,"Error: $error", error)
+                    }
+                }
+                else {
+                    //토큰 유효성 체크 성공(필요 시 토큰 갱신됨)
+                }
+            }
+        }
+        else {
+            // Kakao Login
+            Session.getCurrentSession().addCallback(callback)
+            Session.getCurrentSession().open(AuthType.KAKAO_LOGIN_ALL, this) // 세션 오픈을 진행
+        }
+
     }
 
     open fun getFirebaseJwt(kakaoAccessToken: String): Task<String> {
@@ -179,15 +203,6 @@ open class LoginActivity : AppCompatActivity() {
     // Login Result
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d(TAG, "LoginActivity - onActivityResult() called")
-
-        // 카카오
-        /*
-        boolean handleActivityResult()
-        로그인 activity를 이용하여 sdk에서 필요로 하는 activity를 띄운다.
-        따라서 해당 activity의 결과를 로그인 activity가 받게 된다.
-        해당 결과를 세션이 받아서 다음 처리를 할 수 있도록 로그인 activity의 onActivityResult에서 해당 method를 호출한다.
-        returns true if the intent originated from Kakao login, false otherwise.
-        */
 
         if(Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)){
             Log.i(TAG, "Session get current session")

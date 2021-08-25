@@ -19,6 +19,8 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.kakao.sdk.user.UserApiClient
+import com.kakao.usermgmt.UserManagement
+import java.lang.Error
 import java.lang.NullPointerException
 import java.time.LocalDate
 
@@ -137,6 +139,8 @@ class CalendarFragment : Fragment() {
         var mRef: DatabaseReference
 
         try{
+            // kakao v1 : UserManagement ; v2 : UserApiClient
+//            UserManagement.getInstance().me()
             UserApiClient.instance.me { user, error ->
                 if (error != null) {
                     Log.e(TAG, "사용자 정보 요청 실패", error)
@@ -168,7 +172,9 @@ class CalendarFragment : Fragment() {
                     })
                 }
             }
-        }catch(e: NullPointerException){
+        }catch(e: Error){
+            Log.d(TAG, "Error occurred", e)
+            Toast.makeText(App.instance, "Error occurred : $e", Toast.LENGTH_LONG).show()
         }
     }
 
