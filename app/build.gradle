@@ -77,7 +77,7 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:28.2.1')
     implementation 'com.google.firebase:firebase-database-ktx' // Realtime Database library
     implementation 'com.google.firebase:firebase-auth-ktx' // Authentication library
-    implementation 'com.google.firebase:firebase-core:19.0.0'
+    implementation 'com.google.firebase:firebase-core:19.0.1'
     implementation "com.firebaseui:firebase-ui-auth:7.2.0" // gradle_firebase_ui_auth
     implementation 'com.google.android.gms:play-services-auth:19.2.0' // Google Play services library
     testImplementation 'junit:junit:4.13.2'
@@ -85,5 +85,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.5.20"
 
-    implementation 'com.android.volley:volley:1.2.0'
+    implementation 'com.android.volley:volley:1.2.1'
 }
