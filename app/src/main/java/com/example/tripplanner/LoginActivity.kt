@@ -1,6 +1,9 @@
 package com.example.tripplanner
 
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
@@ -29,7 +32,11 @@ import com.kakao.sdk.auth.AuthApiClient
 import com.kakao.sdk.common.model.KakaoSdkError
 import com.kakao.sdk.common.util.Utility
 import com.kakao.sdk.user.UserApiClient
+import com.kakao.util.helper.Utility.getPackageInfo
 import org.json.JSONObject
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
+import java.security.Signature
 
 // loginActivity - class 앞에 abstract 제거 (make activity class as public)
 open class LoginActivity : AppCompatActivity() {
@@ -94,34 +101,12 @@ open class LoginActivity : AppCompatActivity() {
     private fun kakaoLoginStart(){
         Log.d(TAG, "LoginActivity - kakaoLoginStart() called")
         // keyHash 발급
-        val keyHash = Utility.getKeyHash(this)
-        Log.d(TAG, "KEY_HASH : $keyHash")
 
-        val accessToken = Session.getCurrentSession().tokenInfo.accessToken
-        if (AuthApiClient.instance.hasToken()) {
-            UserApiClient.instance.accessTokenInfo { _, error ->
-                if (error != null) {
-                    if (error is KakaoSdkError && error.isInvalidTokenError()) {
-                        // Kakao Login
-                        Session.getCurrentSession().addCallback(callback)
-                        Session.getCurrentSession().open(AuthType.KAKAO_LOGIN_ALL, this) // 세션 오픈을 진행
-                    }
-                    else {
-                        //기타 에러
-                        Log.w(TAG,"Error: $error", error)
-                    }
-                }
-                else {
-                    //토큰 유효성 체크 성공(필요 시 토큰 갱신됨)
-                }
-            }
-        }
-        else {
-            // Kakao Login
-            Session.getCurrentSession().addCallback(callback)
-            Session.getCurrentSession().open(AuthType.KAKAO_LOGIN_ALL, this) // 세션 오픈을 진행
-        }
+        getKeyHash(this)
 
+        // Kakao Login
+        Session.getCurrentSession().addCallback(callback)
+        Session.getCurrentSession().open(AuthType.KAKAO_LOGIN_ALL, this) // 세션 오픈을 진행
     }
 
     open fun getFirebaseJwt(kakaoAccessToken: String): Task<String> {
@@ -160,6 +145,22 @@ open class LoginActivity : AppCompatActivity() {
         return source.task // call validation server and retrieve firebase token
     }
 
+    private fun getKeyHash(context: Context) {
+        try {
+            val packageInfo = packageManager.getPackageInfo(packageName,PackageManager.GET_SIGNING_CERTIFICATES)
+            val signatures = packageInfo.signingInfo.apkContentsSigners
+
+            for(signature in signatures){
+                val md: MessageDigest = MessageDigest.getInstance("SHA")
+                md.update(signature.toByteArray())
+
+                val key = String(Base64.encode(md.digest(), 0))
+                Log.d(TAG,"Hash Key:$key")
+            }
+        }catch(e: Exception){
+            Log.e("name not found", e.toString())
+        }
+    }
 
     /* GOOGLE LOGIN */
     private fun googleLoginStart(){
@@ -167,7 +168,7 @@ open class LoginActivity : AppCompatActivity() {
 
         // BEGIN config_signin
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("347398038418-2fqi70aa6dc1vea3rd91c99ea41cnkr0.apps.googleusercontent.com") // getString(R.string.default_web_client_id)
+            .requestIdToken(getString(R.string.default_web_client_id)) // "347398038418-2fqi70aa6dc1vea3rd91c99ea41cnkr0.apps.googleusercontent.com"
             .requestEmail()
             .build()
         // END
