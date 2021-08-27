@@ -12,14 +12,19 @@ import com.example.tripplanner.*
 import com.example.tripplanner.R
 import com.example.tripplanner.adapters.RecyclerViewAdapterFrag1
 import com.example.tripplanner.databinding.FragmentCalendarBinding
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.kakao.auth.Session
+import com.kakao.network.ErrorResult
 import com.kakao.sdk.user.UserApiClient
 import com.kakao.usermgmt.UserManagement
+import com.kakao.usermgmt.callback.MeV2ResponseCallback
+import com.kakao.usermgmt.response.MeV2Response
 import java.lang.Error
 import java.lang.NullPointerException
 import java.time.LocalDate
@@ -140,7 +145,30 @@ class CalendarFragment : Fragment() {
 
         try{
             // kakao v1 : UserManagement ; v2 : UserApiClient
-//            UserManagement.getInstance().me()
+            UserManagement.getInstance().me(object : MeV2ResponseCallback(){
+                override fun onSuccess(result: MeV2Response?) {
+                    if(result != null){
+                        Log.e(TAG, "사용자 정보 요청 실패")
+
+                    }
+                }
+
+                override fun onSessionClosed(errorResult: ErrorResult?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onFailure(errorResult: ErrorResult?) {
+                    val errorCode = errorResult?.errorCode
+                    val clientErrorCode = -777
+
+                    if(errorCode == clientErrorCode){
+                        Log.e(TAG, "카카오톡 서버의 네트워크가 불안정합니다. 잠시 후 다시 시도해주세요.")
+                    }else{
+                        Log.e(TAG, "알 수 없는 오류로 카카오로그인 실패 \n${errorResult?.errorMessage}")
+                    }
+                }
+            })
+
             UserApiClient.instance.me { user, error ->
                 if (error != null) {
                     Log.e(TAG, "사용자 정보 요청 실패", error)
